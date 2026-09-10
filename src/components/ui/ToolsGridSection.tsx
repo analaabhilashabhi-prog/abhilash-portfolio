@@ -9,6 +9,7 @@ import logo7Url from '../../assets/logos/logo-dotted-7.svg';
 import logo8Url from '../../assets/logos/logo-dotted-8.svg';
 import logo9Url from '../../assets/logos/logo-dotted-9.svg';
 import scalableTextUrl from '../../assets/logos/text-scalable.svg';
+import descHalftoneUrl from '../../assets/logos/text-toolstack-desc.svg';
 
 export interface ToolItem {
   id: string;
@@ -74,8 +75,8 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
 }) => {
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 pt-0 pb-12 flex flex-col lg:flex-row items-start justify-between gap-10 lg:gap-14 xl:gap-20 select-none">
-      {/* LEFT: Simple text with highlighted keywords */}
-      <div className="tools-left-content w-full lg:w-[38%] xl:w-[36%] flex flex-col justify-start text-left shrink-0 will-change-transform pt-2">
+      {/* LEFT: Heading + Halftone Dot-matrix Animated Description */}
+      <div className="tools-left-content w-full lg:w-[40%] xl:w-[38%] flex flex-col justify-start text-left shrink-0 will-change-transform pt-2">
         <h2
           className="text-[38px] sm:text-[48px] md:text-[56px] xl:text-[64px] font-bold text-white tracking-[-0.035em] leading-[1.05] mb-6"
           style={{ fontFamily: 'var(--font-heading)' }}
@@ -83,20 +84,17 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
           Tool Stack
         </h2>
 
-        <p className="text-[17px] sm:text-[19px] md:text-[21px] lg:text-[22px] text-white/65 leading-[1.65] font-normal tracking-[-0.01em]">
-          Every project is built on a carefully selected stack of{' '}
-          <span className="text-white font-medium">enterprise-grade tools</span> — from{' '}
-          <span className="text-white font-medium">Power BI</span> and{' '}
-          <span className="text-white font-medium">SQL Server</span> for analytics, to{' '}
-          <span className="text-white font-medium">Snowflake</span> and{' '}
-          <span className="text-white font-medium">Azure</span> for scalable cloud
-          infrastructure. These are the technologies I rely on daily to deliver{' '}
-          <span className="text-white font-medium">production-ready</span> data solutions.
-        </p>
+        <div className="w-full max-w-[560px]">
+          <img
+            src={descHalftoneUrl}
+            alt="Every project is built on a carefully selected stack of enterprise-grade tools — from Power BI and SQL Server for analytics, to Snowflake and Azure for scalable cloud infrastructure. These are the technologies I rely on daily to deliver production-ready data solutions."
+            className="w-full h-auto block filter drop-shadow-[0_0_16px_rgba(255,255,255,0.12)] select-none pointer-events-none"
+          />
+        </div>
       </div>
 
       {/* RIGHT: 4×3 Bento Grid (12 boxes) */}
-      <div className="tools-right-stack w-full lg:w-[62%] xl:w-[64%] flex flex-col items-stretch lg:items-end will-change-transform">
+      <div className="tools-right-stack w-full lg:w-[60%] xl:w-[62%] flex flex-col items-stretch lg:items-end will-change-transform">
         <div className="relative w-full">
           {/* Corner Blueprint Accents */}
           <div
