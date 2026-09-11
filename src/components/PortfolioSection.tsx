@@ -196,7 +196,7 @@ export const PortfolioSection: React.FC<{
           trigger: runwayRef.current,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 0.5, // Crisp, smooth single-scroll responsiveness
+          scrub: 0.8, // Film-grade continuous responsiveness locked with Lenis
           onUpdate: (self) => {
             const p = self.progress;
             setActiveCards({
@@ -212,24 +212,16 @@ export const PortfolioSection: React.FC<{
         },
       });
 
-      // SET INITIAL STATE: Section 4 elements start hidden for staggered fade-in
-      gsap.set('.fourth-section-badge', { opacity: 0, y: 30 });
-      gsap.set('.fourth-section-title', { opacity: 0, y: 40 });
-      gsap.set('.fourth-section-desc', { opacity: 0, y: 30 });
-      gsap.set('.fourth-section-hands', { opacity: 0, y: 50, scale: 0.97 });
+      // SET INITIAL STATES: Section 4 elements start hidden
+      gsap.set('.fourth-section-title', { opacity: 0, y: 35 });
+      gsap.set('.fourth-section-desc', { opacity: 0, y: 25 });
+      gsap.set('.fourth-section-hands', { opacity: 0, y: 60, scale: 0.96 });
 
-      // 1. SECTION 2 HEADER PARALLAX (0.0 to 0.6)
+      // 1. SECTION 2 HEADER PARALLAX (0.0 to 0.8)
       tl.fromTo(
         section2HeaderRef.current,
-        {
-          y: 35,
-          opacity: 0,
-        },
-        {
-          y: 0,
-          opacity: 1,
-          ease: 'power2.out',
-        },
+        { y: 35, opacity: 0 },
+        { y: 0, opacity: 1, ease: 'power3.out', duration: 0.7 },
         0.0
       );
 
@@ -237,34 +229,34 @@ export const PortfolioSection: React.FC<{
       tl.fromTo(
         '.metric-box-0',
         { y: 60, opacity: 0, scale: 0.96 },
-        { y: 0, opacity: 1, scale: 1, ease: 'power2.out' },
+        { y: 0, opacity: 1, scale: 1, ease: 'power3.out' },
         0.2
       );
       tl.fromTo(
         '.metric-box-1',
         { y: 70, opacity: 0, scale: 0.96 },
-        { y: 0, opacity: 1, scale: 1, ease: 'power2.out' },
-        0.4
+        { y: 0, opacity: 1, scale: 1, ease: 'power3.out' },
+        0.38
       );
       tl.fromTo(
         '.metric-box-2',
         { y: 80, opacity: 0, scale: 0.96 },
-        { y: 0, opacity: 1, scale: 1, ease: 'power2.out' },
-        0.6
+        { y: 0, opacity: 1, scale: 1, ease: 'power3.out' },
+        0.56
       );
       tl.fromTo(
         '.metric-box-3',
         { y: 90, opacity: 0, scale: 0.96 },
-        { y: 0, opacity: 1, scale: 1, ease: 'power2.out' },
-        0.8
+        { y: 0, opacity: 1, scale: 1, ease: 'power3.out' },
+        0.74
       );
 
       // Description
       tl.fromTo(
         '.footprint-wrapper',
         { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, ease: 'power2.out' },
-        0.9
+        { y: 0, opacity: 1, ease: 'power3.out' },
+        0.85
       );
 
       // Micro-parallax inside graphic boxes
@@ -273,10 +265,10 @@ export const PortfolioSection: React.FC<{
       tl.fromTo('.box-graphic-2', { y: 10 }, { y: 0, ease: 'none' }, 0.7);
       tl.fromTo('.box-graphic-3', { y: 10 }, { y: 0, ease: 'none' }, 0.9);
 
-      // 3. SECTION 2 COMFORTABLE DWELL (1.4 to 1.8)
-      tl.to({}, { duration: 0.4 }, 1.4);
+      // 3. SECTION 2 COMFORTABLE DWELL (1.4 to 1.9)
+      tl.to({}, { duration: 0.5 }, 1.4);
 
-      // 4. SMOOTH SCROLL TO SECTION 3 (1.8 to 2.7)
+      // 4. SMOOTH GLIDE TO SECTION 3 (1.9 to 2.9)
       tl.to(
         section2ContentRef.current,
         {
@@ -289,33 +281,33 @@ export const PortfolioSection: React.FC<{
             }
             return -(window.innerHeight * 0.72);
           },
-          ease: 'power2.inOut',
-          duration: 0.9,
+          ease: 'power3.inOut',
+          duration: 1.0,
         },
-        1.8
+        1.9
       );
 
-      // 5. SECTION 3 TOOLS GRID DWELL (2.7 to 3.5) - comfortable viewing time
-      tl.to({}, { duration: 0.8 }, 2.7);
+      // 5. SECTION 3 TOOLS GRID DWELL (2.9 to 3.8) - comfortable viewing time
+      tl.to({}, { duration: 0.9 }, 2.9);
 
-      // 6. STAGGERED FADE OUT - Section 3 elements dissolve progressively
+      // 6. STAGGERED FADE OUT - Section 3 elements dissolve progressively (3.8 to 4.5)
       // 6a. Left column (heading + description) fades out first
       tl.to('.tools-left-content', {
-        opacity: 0, y: -35, ease: 'power2.in', duration: 0.35,
-      }, 3.5);
+        opacity: 0, y: -30, ease: 'power2.in', duration: 0.35,
+      }, 3.8);
 
       // 6b. Individual tool boxes stagger out from bottom to top
       tl.to('.tool-box-card', {
         opacity: 0, y: -20, ease: 'power2.in', duration: 0.3,
-        stagger: { each: 0.06, from: 'end' },
-      }, 3.8);
+        stagger: { each: 0.05, from: 'end' },
+      }, 4.0);
 
-      // 6c. Overall section 3 container fade (catches all decorative elements)
+      // 6c. Overall section 3 container fade
       tl.to('#third-section-content', {
-        opacity: 0, ease: 'power2.in', duration: 0.8,
-      }, 3.8);
+        opacity: 0, ease: 'power2.in', duration: 0.7,
+      }, 4.0);
 
-      // 7. SCROLL content up to Section 4 position (runs parallel to fade-out)
+      // 7. SCROLL content up to Section 4 position (runs parallel to fade-out: 4.1 to 5.5)
       tl.to(
         section2ContentRef.current,
         {
@@ -324,39 +316,34 @@ export const PortfolioSection: React.FC<{
             if (el && section2ContentRef.current) {
               const contentTop = section2ContentRef.current.getBoundingClientRect().top;
               const sectionTop = el.getBoundingClientRect().top;
-              return -(sectionTop - contentTop - 40);
+              return -(sectionTop - contentTop - 12);
             }
             return -(window.innerHeight * 2.6);
           },
-          ease: 'power2.inOut',
+          ease: 'power3.inOut',
           duration: 1.4,
         },
-        3.8
+        4.1
       );
 
-      // 8. STAGGERED FADE IN - Section 4 elements appear one by one
-      // 8a. "04 // PROJECTS" badge fades in
-      tl.to('.fourth-section-badge', {
-        opacity: 1, y: 0, ease: 'power2.out', duration: 0.25,
-      }, 4.8);
-
-      // 8b. "Projects" title fades in
+      // 8. STAGGERED FADE IN - Section 4 elements appear with smooth easing
+      // 8a. "Projects" title fades in
       tl.to('.fourth-section-title', {
-        opacity: 1, y: 0, ease: 'power2.out', duration: 0.3,
-      }, 5.0);
+        opacity: 1, y: 0, ease: 'power3.out', duration: 0.4,
+      }, 5.05);
 
-      // 8c. Description text fades in
+      // 8b. Description text fades in
       tl.to('.fourth-section-desc', {
-        opacity: 1, y: 0, ease: 'power2.out', duration: 0.25,
-      }, 5.2);
+        opacity: 1, y: 0, ease: 'power3.out', duration: 0.35,
+      }, 5.3);
 
-      // 8d. Hands/tablet artwork rises in from bottom
+      // 8c. Hands/tablet artwork rises in from bottom and docks cleanly
       tl.to('.fourth-section-hands', {
-        opacity: 1, y: 0, scale: 1, ease: 'power2.out', duration: 0.4,
-      }, 5.4);
+        opacity: 1, y: 0, scale: 1, ease: 'power3.out', duration: 0.55,
+      }, 5.55);
 
-      // 9. SECTION 4 PINNED SHOWCASE HOLD (5.8 to 7.0)
-      tl.to({}, { duration: 1.2 }, 5.8);
+      // 9. SECTION 4 PINNED SHOWCASE HOLD (6.1 to 7.6)
+      tl.to({}, { duration: 1.5 }, 6.1);
     }, runwayRef);
 
     return () => ctx.revert();
@@ -438,7 +425,7 @@ export const PortfolioSection: React.FC<{
     <section
       ref={runwayRef}
       id="portfolio-section"
-      className="relative z-10 w-full h-[700vh] bg-[#000000]"
+      className="relative z-10 w-full h-[760vh] bg-[#000000]"
     >
       {/* STICKY FULL-SCREEN VIEWPORT CONTAINER - STAYS STILL ON PURE BLACK */}
       <div className="sticky top-0 w-full h-screen flex items-center justify-center overflow-hidden bg-[#000000]">

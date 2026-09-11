@@ -16,7 +16,6 @@
 }
 
 html {
-  scroll-behavior: smooth;
   background-color: #a6a3a4;
 }
 
@@ -28,6 +27,27 @@ body {
   color: #000000;
   overflow-x: hidden;
 }
+
+/* Sublevel Studio Architectural Guidelines & Hairline Unrolls */
+.studio-rule {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  transform-origin: left center;
+  transform: scaleX(0);
+  will-change: transform;
+}
+
+.studio-corner {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  pointer-events: none;
+}
+.studio-corner.tl { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+.studio-corner.tr { top: -1px; right: -1px; border-left: 0; border-bottom: 0; }
+.studio-corner.bl { bottom: -1px; left: -1px; border-right: 0; border-top: 0; }
+.studio-corner.br { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
 
 @keyframes blink {
   0%, 100% {

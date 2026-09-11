@@ -9,6 +9,7 @@ import logo7Url from '../../assets/logos/logo-dotted-7.svg';
 import logo8Url from '../../assets/logos/logo-dotted-8.svg';
 import logo9Url from '../../assets/logos/logo-dotted-9.svg';
 import scalableTextUrl from '../../assets/logos/text-scalable.svg';
+import projectTitleSvg from '../../assets/logos/project-title-dotted.svg';
 import handsDeviceSvg from '../../assets/hands-device-frame.svg';
 
 export interface ToolItem {
@@ -73,6 +74,31 @@ const ToolBox: React.FC<{ tool?: ToolItem; isHatched?: boolean; className?: stri
 export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
   tools = defaultTools,
 }) => {
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = React.useState(true);
+  const [isMuted, setIsMuted] = React.useState(true);
+
+  const togglePlay = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play();
+        setIsPlaying(true);
+      } else {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      }
+    }
+  };
+
+  const toggleMute = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
+    }
+  };
+
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 pt-0 pb-16 flex flex-col">
       {/* 1. TOP ROW: Tool Stack Header on Left, 4×3 Bento Grid on Right */}
@@ -166,105 +192,62 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
       </div>
 
       {/* 2. SECTION 04: PROJECTS SECTION PLACEMENT
-          - Left: Hands tablet pushed to the far left corner with negative margin and enlarged
-          - Center: Tablet screen maximized for 16:9 project demos, screenshots, and presentations
-          - Bottom: Hands anchor down to the bottom of the screen so they don't hover mid-air
-          - Right: Aligned with the cloud logo column for clean project typography & metadata
+          - Left: Hands tablet scaled down slightly and shifted further left for balanced stage
+          - Center: Tablet screen maximized with authentic high-end Loop Task Management System UI
+          - Bottom: Hands anchor down to the bottom of the screen with wrists grounded
+          - Right: Ultra-premium architectural project showcase card
       */}
       <div
         id="fourth-section"
-        className="w-full mt-[100vh] pt-2 flex flex-col-reverse lg:flex-row items-end justify-between gap-6 lg:gap-8 xl:gap-12"
+        className="w-full mt-[100vh] min-h-[calc(100vh-3.5rem)] lg:min-h-[calc(100vh-4rem)] pt-2 flex flex-col-reverse lg:flex-row items-end justify-between gap-6 lg:gap-8 xl:gap-10 pb-2 sm:pb-3 lg:pb-4"
       >
-        {/* LEFT: Hands Tablet Artwork - Left-aligned, balanced scale & anchored to bottom */}
-        <div className="fourth-section-hands w-[calc(100%+1.5rem)] sm:w-[calc(100%+2rem)] lg:w-[70%] xl:w-[72%] -ml-6 sm:-ml-10 md:-ml-12 lg:-ml-16 xl:-ml-20 -translate-x-2 sm:-translate-x-4 lg:-translate-x-6 flex items-end justify-start self-end overflow-visible">
-          <div className="relative w-full max-w-[980px] lg:max-w-[1080px] aspect-[960/729] flex items-end justify-start">
-            {/* Screen Content Layer (inside the tablet frame cutout: 20.58% left, 10.28% top, 60.48% width, 54.64% height) */}
+        {/* LEFT: Hands Tablet Artwork - Shifted a bit left side */}
+        <div className="fourth-section-hands w-full lg:w-[58%] xl:w-[57%] -ml-10 sm:-ml-16 lg:-ml-22 xl:-ml-28 flex items-end justify-start self-end overflow-visible shrink-0">
+          <div className="relative w-full max-w-[760px] lg:max-w-[830px] xl:max-w-[880px] aspect-[960/729] flex items-end justify-start translate-y-0">
+            {/* Screen Content Layer - Full Video filling the entire tablet screen (20.58% left, 10.28% top, 60.48% width, 54.64% height) */}
             <div
-              className="absolute z-10 overflow-hidden bg-[#050508] border border-white/10 rounded-[6px] sm:rounded-[10px] md:rounded-[14px] flex flex-col shadow-[0_0_60px_rgba(0,0,0,0.95)]"
+              className="absolute z-10 overflow-hidden bg-black border border-white/15 rounded-[6px] sm:rounded-[10px] md:rounded-[14px] shadow-[0_0_70px_rgba(0,0,0,0.95)] group cursor-pointer"
               style={{
                 left: '20.58%',
                 top: '10.28%',
                 width: '60.48%',
                 height: '54.64%',
               }}
+              onClick={() => togglePlay()}
             >
-              {/* Screen Top Header: Sleek Browser / Presentation Bar */}
-              <div className="w-full h-6 sm:h-8 md:h-9 bg-[#0e0e13] border-b border-white/10 px-2 sm:px-3.5 flex items-center justify-between shrink-0 select-none">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#ff5f56]" />
-                  <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#ffbd2e]" />
-                  <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#27c93f]" />
-                  <div className="ml-1.5 sm:ml-2.5 px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.08] flex items-center gap-1.5 text-[8.5px] sm:text-[10px] font-mono text-white/60">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    <span>project://16:9-showcase.mp4</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="hidden sm:inline-block text-[8.5px] font-mono text-white/30 uppercase tracking-widest">
-                    1080P • 60FPS
-                  </span>
-                  <div className="flex items-center gap-1 text-[8px] sm:text-[9.5px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 sm:px-2 py-0.5 rounded border border-emerald-500/20 font-semibold">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                    LIVE DEMO
-                  </div>
-                </div>
-              </div>
+              <video
+                ref={videoRef}
+                src="/final-video.mp4"
+                autoPlay
+                loop
+                muted={isMuted}
+                playsInline
+                className="w-full h-full object-cover select-none"
+              />
 
-              {/* 16:9 Display Canvas (Maximized for project videos, recordings & screenshots) */}
-              <div className="relative w-full flex-1 p-3 sm:p-4 md:p-6 flex flex-col justify-between bg-gradient-to-b from-[#0b0b10] via-[#050508] to-[#020204] overflow-hidden">
-                {/* Ambient Screen Grid Texture */}
-                <div
-                  className="absolute inset-0 pointer-events-none opacity-20"
-                  style={{
-                    backgroundImage:
-                      'radial-gradient(circle, rgba(255, 255, 255, 0.25) 1px, transparent 1px)',
-                    backgroundSize: '20px 20px',
-                  }}
-                />
+              {/* Subtle dark gradient overlay at bottom for controls visibility */}
+              <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                {/* Main 16:9 Presentation Stage */}
-                <div className="relative z-10 flex flex-col justify-between h-full">
-                  {/* Top Badge & Project Category */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-[8.5px] sm:text-[10px] font-mono text-emerald-300 font-medium tracking-wide">
-                        FEATURED SYSTEM
-                      </span>
-                      <span className="text-[9px] sm:text-[11px] font-mono text-white/40">
-                        Enterprise Power BI & Pipeline
-                      </span>
-                    </div>
-                    <span className="text-[8.5px] sm:text-[10px] font-mono text-white/40">
-                      16:9 ASPECT READY
-                    </span>
-                  </div>
-
-                  {/* Center Hero Showcase Title & Content */}
-                  <div className="my-auto py-1 sm:py-2 space-y-1 sm:space-y-1.5">
-                    <h4
-                      className="text-[14px] sm:text-[19px] md:text-[23px] lg:text-[26px] font-bold text-white tracking-tight leading-snug"
-                      style={{ fontFamily: 'var(--font-heading)' }}
-                    >
-                      Automated Operational Intelligence Platform
-                    </h4>
-                    <p className="text-[10px] sm:text-[12px] md:text-[13px] text-white/70 max-w-lg leading-relaxed">
-                      End-to-end telemetry ingestion, sub-second query pipelines, and real-time executive dashboarding with row-level security.
-                    </p>
-                  </div>
-
-                  {/* Bottom Control / Status Bar */}
-                  <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[8px] sm:text-[10px] font-mono">
-                    <div className="flex items-center gap-2.5 text-white/50">
-                      <span>• DAX Studio</span>
-                      <span>• Power Query</span>
-                      <span>• Snowflake</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      <span>16:9 MEDIA CANVAS</span>
-                    </div>
-                  </div>
-                </div>
+              {/* Floating Controls Overlay (Pause/Play & Mute/Unmute on hover) */}
+              <div className="absolute bottom-2 sm:bottom-2.5 right-2 sm:right-2.5 z-20 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  type="button"
+                  onClick={togglePlay}
+                  className="px-2 py-1 rounded bg-black/75 backdrop-blur-md border border-white/20 text-white hover:bg-white/15 transition-colors text-[8px] sm:text-[9.5px] font-mono flex items-center gap-1 shadow-lg cursor-pointer"
+                  title={isPlaying ? 'Pause video' : 'Play video'}
+                >
+                  <span>{isPlaying ? '⏸' : '▶'}</span>
+                  <span>{isPlaying ? 'PAUSE' : 'PLAY'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={toggleMute}
+                  className="px-2 py-1 rounded bg-black/75 backdrop-blur-md border border-white/20 text-white hover:bg-white/15 transition-colors text-[8px] sm:text-[9.5px] font-mono flex items-center gap-1 shadow-lg cursor-pointer"
+                  title={isMuted ? 'Unmute video' : 'Mute video'}
+                >
+                  <span>{isMuted ? '🔇' : '🔊'}</span>
+                  <span>{isMuted ? 'MUTED' : 'SOUND'}</span>
+                </button>
               </div>
             </div>
 
@@ -277,25 +260,79 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
           </div>
         </div>
 
-        {/* RIGHT: After the cloud logo column - Clean Title & Project Details */}
-        <div className="w-full lg:w-[28%] xl:w-[26%] flex flex-col items-start justify-start text-left pb-4 lg:pb-8 shrink-0">
-          <div className="fourth-section-badge inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 mb-4">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[11px] sm:text-[12px] font-mono uppercase tracking-widest text-emerald-400 font-semibold">
-              04 // PROJECTS
-            </span>
+        {/* RIGHT: Top-Aligned Minimal Typography with Signature Tool Grid - Shifted a bit right */}
+        <div className="w-full lg:w-[46%] xl:w-[46%] flex flex-col justify-start text-left pt-2 sm:pt-4 lg:pt-6 pb-8 lg:pl-6 xl:pl-8 lg:translate-x-2 xl:translate-x-4 shrink-0 select-text self-start">
+          {/* Title - Halftone Dotted Graphic - Much bigger with generous margin */}
+          <div
+            className="fourth-section-title mb-8 sm:mb-10 lg:mb-14 xl:mb-16 -ml-8 sm:-ml-16 lg:-ml-28 xl:-ml-36"
+            role="heading"
+            aria-level={3}
+            aria-label="Loop Task Management System"
+          >
+            <img
+              src={projectTitleSvg}
+              alt="Loop Task Management System"
+              className="w-full max-w-[600px] sm:max-w-[720px] md:max-w-[840px] lg:max-w-[960px] xl:max-w-[1080px] h-auto object-contain filter drop-shadow-[0_0_28px_rgba(255,255,255,0.2)] pointer-events-none select-none"
+            />
           </div>
 
-          <h3
-            className="fourth-section-title text-[36px] sm:text-[46px] md:text-[54px] lg:text-[60px] font-bold text-white tracking-[-0.035em] leading-[1.05]"
-            style={{ fontFamily: 'var(--font-heading)' }}
-          >
-            Projects
-          </h3>
+          {/* Description with Generous Spacing & Signature Tools Grid */}
+          <div className="fourth-section-desc space-y-8 sm:space-y-10 lg:space-y-12">
+            <p className="text-[17px] sm:text-[18.5px] md:text-[20px] lg:text-[21px] text-white/75 leading-[1.85] sm:leading-[1.9] font-normal tracking-[-0.012em]">
+              Architected an enterprise grade, multi tenant task and workforce management portal with a{' '}
+              <span className="text-white font-medium">4 tier RBAC system</span> across 13 controllers and 12 route groups. Built a{' '}
+              <span className="text-white font-medium">Stale While Revalidate caching engine</span> processing{' '}
+              <span className="text-white font-medium">300,000+ biometric attendance logs</span>, plus automated{' '}
+              <span className="text-white font-medium">Excel JS / PDF Kit</span> reporting pipelines with{' '}
+              <span className="text-white font-medium">tamper proof daily work logs</span>.
+            </p>
 
-          <p className="fourth-section-desc mt-4 text-[13px] sm:text-[14px] text-white/60 leading-relaxed font-normal">
-            Handheld interactive showcase of enterprise BI dashboards, ETL data pipelines, and analytics automation engineered for decision makers.
-          </p>
+            {/* Tools Used: Signature Grid-Type Manner with Ample Spacing */}
+            <div className="pt-2 sm:pt-4">
+              <div className="text-[11.5px] sm:text-[13px] font-mono text-white/45 uppercase tracking-widest mb-4 sm:mb-5 flex items-center gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span>Core Stack & Modules</span>
+              </div>
+
+              <div className="relative w-full border border-white/15 bg-[#030304] overflow-hidden">
+                {/* 3×2 Bento Grid for the 6 Core Project Tools - Generous padding & cell heights */}
+                <div className="grid grid-cols-2 sm:grid-cols-3">
+                  {[
+                    { name: 'Claude Code', category: 'AI & Synthesis', isHatched: false },
+                    { name: 'Antigravity', category: 'Agentic Core', isHatched: true },
+                    { name: 'RBAC', category: '4-Tier Security', isHatched: false },
+                    { name: 'Caching Engine', category: 'SWR Architecture', isHatched: true },
+                    { name: 'Excel JS', category: 'Report Pipeline', isHatched: false },
+                    { name: 'PDF Kit', category: 'Tamper-Proof Audit', isHatched: true },
+                  ].map((item, idx) => (
+                    <div
+                      key={item.name}
+                      className={`relative min-h-[96px] sm:min-h-[110px] md:min-h-[118px] p-4 sm:p-5 md:p-5.5 flex flex-col justify-between border-r border-b border-white/[0.1] transition-colors group select-none ${
+                        item.isHatched ? 'bg-[#040405]' : 'bg-[#070709] hover:bg-[#0c0c0f]'
+                      }`}
+                      style={item.isHatched ? hatchedStyle : undefined}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] sm:text-[10px] md:text-[10.5px] font-mono text-white/40 uppercase tracking-wider">
+                          0{idx + 1} // {item.category}
+                        </span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-white/20 group-hover:bg-emerald-400 transition-colors" />
+                      </div>
+                      <span className="text-[14.5px] sm:text-[16px] md:text-[17px] font-bold text-white tracking-tight group-hover:text-emerald-300 transition-colors pt-2">
+                        {item.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Corner Intersection Rings */}
+                <span className="absolute -top-1 -left-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
+                <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
+                <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
