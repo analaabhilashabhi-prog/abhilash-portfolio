@@ -76,7 +76,10 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 pt-0 pb-16 flex flex-col">
       {/* 1. TOP ROW: Tool Stack Header on Left, 4×3 Bento Grid on Right */}
-      <div className="w-full flex flex-col lg:flex-row items-start justify-between gap-10 lg:gap-14 xl:gap-20">
+      <div
+        id="third-section-content"
+        className="w-full flex flex-col lg:flex-row items-start justify-between gap-10 lg:gap-14 xl:gap-20 will-change-transform"
+      >
         {/* LEFT: Normal readable description text */}
         <div className="tools-left-content w-full lg:w-[38%] xl:w-[36%] flex flex-col justify-start text-left shrink-0 will-change-transform pt-2 select-text">
           <h2
@@ -163,80 +166,120 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
       </div>
 
       {/* 2. SECTION 04: PROJECTS SECTION PLACEMENT
-          - Space between Section 3 and Section 4 slightly increased per user request
-          - Left: From the left end-point till the cloud logo box, hands tablet enlarged to occupy the area
-          - Right: After the cloud logo, the project section title and matter space
+          - Left: Hands tablet pushed to the far left corner with negative margin and enlarged
+          - Center: Tablet screen maximized for 16:9 project demos, screenshots, and presentations
+          - Bottom: Hands anchor down to the bottom of the screen so they don't hover mid-air
+          - Right: Aligned with the cloud logo column for clean project typography & metadata
       */}
       <div
         id="fourth-section"
-        className="w-full mt-28 sm:mt-36 md:mt-44 pt-4 flex flex-col-reverse lg:flex-row items-center lg:items-start justify-between gap-8 lg:gap-10 xl:gap-14"
+        className="w-full mt-[100vh] pt-2 flex flex-col-reverse lg:flex-row items-end justify-between gap-6 lg:gap-8 xl:gap-12"
       >
-        {/* LEFT: Hands Tablet Artwork from left end-point extending till the cloud logo box */}
-        <div className="w-full lg:w-[73%] xl:w-[74%] flex items-center justify-start">
-          <div className="relative w-full max-w-[1250px] aspect-[960/515] flex items-center justify-start">
-            {/* Screen Content Layer (inside the tablet frame cutout) */}
+        {/* LEFT: Hands Tablet Artwork - Left-aligned, balanced scale & anchored to bottom */}
+        <div className="fourth-section-hands w-[calc(100%+1.5rem)] sm:w-[calc(100%+2rem)] lg:w-[70%] xl:w-[72%] -ml-6 sm:-ml-10 md:-ml-12 lg:-ml-16 xl:-ml-20 -translate-x-2 sm:-translate-x-4 lg:-translate-x-6 flex items-end justify-start self-end overflow-visible">
+          <div className="relative w-full max-w-[980px] lg:max-w-[1080px] aspect-[960/729] flex items-end justify-start">
+            {/* Screen Content Layer (inside the tablet frame cutout: 20.58% left, 10.28% top, 60.48% width, 54.64% height) */}
             <div
-              className="absolute z-10 overflow-hidden bg-[#07070a] border border-white/10 rounded-[6px] sm:rounded-[8px] flex flex-col shadow-2xl"
+              className="absolute z-10 overflow-hidden bg-[#050508] border border-white/10 rounded-[6px] sm:rounded-[10px] md:rounded-[14px] flex flex-col shadow-[0_0_60px_rgba(0,0,0,0.95)]"
               style={{
-                left: '21.5%',
-                top: '11.0%',
-                width: '57.0%',
-                height: '81.4%',
+                left: '20.58%',
+                top: '10.28%',
+                width: '60.48%',
+                height: '54.64%',
               }}
             >
-              {/* Screen Top Header */}
-              <div className="w-full h-7 sm:h-8 bg-[#111116] border-b border-white/10 px-3 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-red-500/80" />
-                  <span className="w-2 h-2 rounded-full bg-yellow-500/80" />
-                  <span className="w-2 h-2 rounded-full bg-emerald-500/80" />
-                  <span className="ml-2 text-[10px] font-mono text-white/40 uppercase tracking-wider">
-                    project://workspace
-                  </span>
+              {/* Screen Top Header: Sleek Browser / Presentation Bar */}
+              <div className="w-full h-6 sm:h-8 md:h-9 bg-[#0e0e13] border-b border-white/10 px-2 sm:px-3.5 flex items-center justify-between shrink-0 select-none">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#ff5f56]" />
+                  <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#ffbd2e]" />
+                  <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#27c93f]" />
+                  <div className="ml-1.5 sm:ml-2.5 px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.08] flex items-center gap-1.5 text-[8.5px] sm:text-[10px] font-mono text-white/60">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span>project://16:9-showcase.mp4</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1 text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                  STANDBY
+                <div className="flex items-center gap-2">
+                  <span className="hidden sm:inline-block text-[8.5px] font-mono text-white/30 uppercase tracking-widest">
+                    1080P • 60FPS
+                  </span>
+                  <div className="flex items-center gap-1 text-[8px] sm:text-[9.5px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 sm:px-2 py-0.5 rounded border border-emerald-500/20 font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                    LIVE DEMO
+                  </div>
                 </div>
               </div>
 
-              {/* Screen Body Canvas */}
-              <div className="relative w-full flex-1 p-4 sm:p-6 flex flex-col justify-between bg-radial from-emerald-950/20 via-transparent to-black/90">
-                <div className="space-y-2">
-                  <div className="text-[10px] sm:text-[11px] font-mono text-emerald-400 uppercase tracking-wider">
-                    Active Project Surface
-                  </div>
-                  <h4
-                    className="text-[16px] sm:text-[22px] md:text-[26px] font-bold text-white tracking-tight leading-snug"
-                    style={{ fontFamily: 'var(--font-heading)' }}
-                  >
-                    Interactive Project Display
-                  </h4>
-                  <p className="text-[11px] sm:text-[13px] text-white/60 max-w-md leading-relaxed">
-                    Projects will be showcased directly inside this handheld tablet display.
-                  </p>
-                </div>
+              {/* 16:9 Display Canvas (Maximized for project videos, recordings & screenshots) */}
+              <div className="relative w-full flex-1 p-3 sm:p-4 md:p-6 flex flex-col justify-between bg-gradient-to-b from-[#0b0b10] via-[#050508] to-[#020204] overflow-hidden">
+                {/* Ambient Screen Grid Texture */}
+                <div
+                  className="absolute inset-0 pointer-events-none opacity-20"
+                  style={{
+                    backgroundImage:
+                      'radial-gradient(circle, rgba(255, 255, 255, 0.25) 1px, transparent 1px)',
+                    backgroundSize: '20px 20px',
+                  }}
+                />
 
-                {/* Status Bar */}
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[9px] sm:text-[10px] font-mono text-white/40">
-                  <span>CANVAS: 960 × 515</span>
-                  <span className="text-emerald-400 font-semibold">READY FOR CONTENT</span>
+                {/* Main 16:9 Presentation Stage */}
+                <div className="relative z-10 flex flex-col justify-between h-full">
+                  {/* Top Badge & Project Category */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-[8.5px] sm:text-[10px] font-mono text-emerald-300 font-medium tracking-wide">
+                        FEATURED SYSTEM
+                      </span>
+                      <span className="text-[9px] sm:text-[11px] font-mono text-white/40">
+                        Enterprise Power BI & Pipeline
+                      </span>
+                    </div>
+                    <span className="text-[8.5px] sm:text-[10px] font-mono text-white/40">
+                      16:9 ASPECT READY
+                    </span>
+                  </div>
+
+                  {/* Center Hero Showcase Title & Content */}
+                  <div className="my-auto py-1 sm:py-2 space-y-1 sm:space-y-1.5">
+                    <h4
+                      className="text-[14px] sm:text-[19px] md:text-[23px] lg:text-[26px] font-bold text-white tracking-tight leading-snug"
+                      style={{ fontFamily: 'var(--font-heading)' }}
+                    >
+                      Automated Operational Intelligence Platform
+                    </h4>
+                    <p className="text-[10px] sm:text-[12px] md:text-[13px] text-white/70 max-w-lg leading-relaxed">
+                      End-to-end telemetry ingestion, sub-second query pipelines, and real-time executive dashboarding with row-level security.
+                    </p>
+                  </div>
+
+                  {/* Bottom Control / Status Bar */}
+                  <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[8px] sm:text-[10px] font-mono">
+                    <div className="flex items-center gap-2.5 text-white/50">
+                      <span>• DAX Studio</span>
+                      <span>• Power Query</span>
+                      <span>• Snowflake</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <span>16:9 MEDIA CANVAS</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Halftone Hands Tablet Frame Overlay */}
+            {/* Halftone Hands Tablet Frame Overlay (Anchored to bottom-left corner) */}
             <img
               src={handsDeviceSvg}
               alt="Hands Holding Tablet"
-              className="absolute inset-0 w-full h-full object-contain object-left pointer-events-none z-20 select-none filter drop-shadow-[0_25px_60px_rgba(0,0,0,0.95)]"
+              className="absolute inset-0 w-full h-full object-contain object-left-bottom pointer-events-none z-20 select-none filter drop-shadow-[0_25px_50px_rgba(0,0,0,0.95)]"
             />
           </div>
         </div>
 
-        {/* RIGHT: After the cloud logo, the clean title & project matter space */}
-        <div className="w-full lg:w-[27%] xl:w-[26%] flex flex-col items-start justify-start text-left pt-2 lg:pt-6 shrink-0">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 mb-4">
+        {/* RIGHT: After the cloud logo column - Clean Title & Project Details */}
+        <div className="w-full lg:w-[28%] xl:w-[26%] flex flex-col items-start justify-start text-left pb-4 lg:pb-8 shrink-0">
+          <div className="fourth-section-badge inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 mb-4">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-[11px] sm:text-[12px] font-mono uppercase tracking-widest text-emerald-400 font-semibold">
               04 // PROJECTS
@@ -244,11 +287,15 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
           </div>
 
           <h3
-            className="text-[36px] sm:text-[46px] md:text-[54px] lg:text-[62px] font-bold text-white tracking-[-0.035em] leading-[1.05]"
+            className="fourth-section-title text-[36px] sm:text-[46px] md:text-[54px] lg:text-[60px] font-bold text-white tracking-[-0.035em] leading-[1.05]"
             style={{ fontFamily: 'var(--font-heading)' }}
           >
             Projects
           </h3>
+
+          <p className="fourth-section-desc mt-4 text-[13px] sm:text-[14px] text-white/60 leading-relaxed font-normal">
+            Handheld interactive showcase of enterprise BI dashboards, ETL data pipelines, and analytics automation engineered for decision makers.
+          </p>
         </div>
       </div>
     </div>

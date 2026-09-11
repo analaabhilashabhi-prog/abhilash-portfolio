@@ -196,14 +196,14 @@ export const PortfolioSection: React.FC<{
           trigger: runwayRef.current,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 1.2, // Apple-grade smooth physics damping
+          scrub: 0.5, // Crisp, smooth single-scroll responsiveness
           onUpdate: (self) => {
             const p = self.progress;
             setActiveCards({
-              card1: p >= 0.16,
-              card2: p >= 0.28,
-              card3: p >= 0.40,
-              card4: p >= 0.52,
+              card1: p >= 0.06,
+              card2: p >= 0.12,
+              card3: p >= 0.18,
+              card4: p >= 0.24,
             });
             if (onScrollProgress) {
               onScrollProgress(p);
@@ -212,11 +212,17 @@ export const PortfolioSection: React.FC<{
         },
       });
 
-      // 1. SECTION 2 HEADER PARALLAX FLOAT (0.0 to 1.2)
+      // SET INITIAL STATE: Section 4 elements start hidden for staggered fade-in
+      gsap.set('.fourth-section-badge', { opacity: 0, y: 30 });
+      gsap.set('.fourth-section-title', { opacity: 0, y: 40 });
+      gsap.set('.fourth-section-desc', { opacity: 0, y: 30 });
+      gsap.set('.fourth-section-hands', { opacity: 0, y: 50, scale: 0.97 });
+
+      // 1. SECTION 2 HEADER PARALLAX (0.0 to 0.6)
       tl.fromTo(
         section2HeaderRef.current,
         {
-          y: 50,
+          y: 35,
           opacity: 0,
         },
         {
@@ -227,81 +233,130 @@ export const PortfolioSection: React.FC<{
         0.0
       );
 
-      // 2. THE 4 BIG BOXES - STAGGERED PARALLAX TRAVEL (0.6 to 4.6)
-      // Box 1:
+      // 2. THE 4 BIG BOXES - STAGGERED PARALLAX ENTRANCE (0.2 to 1.4)
       tl.fromTo(
         '.metric-box-0',
-        { y: 100, opacity: 0, scale: 0.94 },
+        { y: 60, opacity: 0, scale: 0.96 },
+        { y: 0, opacity: 1, scale: 1, ease: 'power2.out' },
+        0.2
+      );
+      tl.fromTo(
+        '.metric-box-1',
+        { y: 70, opacity: 0, scale: 0.96 },
+        { y: 0, opacity: 1, scale: 1, ease: 'power2.out' },
+        0.4
+      );
+      tl.fromTo(
+        '.metric-box-2',
+        { y: 80, opacity: 0, scale: 0.96 },
         { y: 0, opacity: 1, scale: 1, ease: 'power2.out' },
         0.6
       );
-      // Box 2 (parallax staggered):
-      tl.fromTo(
-        '.metric-box-1',
-        { y: 120, opacity: 0, scale: 0.94 },
-        { y: 0, opacity: 1, scale: 1, ease: 'power2.out' },
-        1.4
-      );
-      // Box 3 (parallax staggered):
-      tl.fromTo(
-        '.metric-box-2',
-        { y: 140, opacity: 0, scale: 0.94 },
-        { y: 0, opacity: 1, scale: 1, ease: 'power2.out' },
-        2.2
-      );
-      // Box 4 (parallax staggered):
       tl.fromTo(
         '.metric-box-3',
-        { y: 160, opacity: 0, scale: 0.94 },
+        { y: 90, opacity: 0, scale: 0.96 },
         { y: 0, opacity: 1, scale: 1, ease: 'power2.out' },
-        3.0
+        0.8
       );
 
-      // Experience & Work Description entrance
+      // Description
       tl.fromTo(
         '.footprint-wrapper',
-        { y: 30, opacity: 0 },
+        { y: 20, opacity: 0 },
         { y: 0, opacity: 1, ease: 'power2.out' },
-        3.2
+        0.9
       );
 
-      // Micro-parallax inside boxes (multi-layered optical depth):
-      tl.fromTo('.box-graphic-0', { y: 18 }, { y: 0, ease: 'none' }, 0.7);
-      tl.fromTo('.box-graphic-1', { scale: 0.88, y: 14 }, { scale: 1, y: 0, ease: 'none' }, 1.5);
-      tl.fromTo('.box-graphic-2', { y: 18 }, { y: 0, ease: 'none' }, 2.3);
-      tl.fromTo('.box-graphic-3', { y: 18 }, { y: 0, ease: 'none' }, 3.1);
+      // Micro-parallax inside graphic boxes
+      tl.fromTo('.box-graphic-0', { y: 10 }, { y: 0, ease: 'none' }, 0.3);
+      tl.fromTo('.box-graphic-1', { scale: 0.92, y: 8 }, { scale: 1, y: 0, ease: 'none' }, 0.5);
+      tl.fromTo('.box-graphic-2', { y: 10 }, { y: 0, ease: 'none' }, 0.7);
+      tl.fromTo('.box-graphic-3', { y: 10 }, { y: 0, ease: 'none' }, 0.9);
 
-      // 3. DWELL PERIOD (3.6 to 4.8) - Section 2 cards & description fully settled, interactive, clickable
-      tl.to({}, { duration: 1.2 }, 3.6);
+      // 3. SECTION 2 COMFORTABLE DWELL (1.4 to 1.8)
+      tl.to({}, { duration: 0.4 }, 1.4);
 
-      // 4. PARALLAX CONTINUOUS SCROLL: Moves up cleanly to Section 3 Tools Grid (4.8 to 6.6)
-      // (Background stays completely still on pure black, NO fade-out / fade-in!)
+      // 4. SMOOTH SCROLL TO SECTION 3 (1.8 to 2.7)
       tl.to(
         section2ContentRef.current,
         {
-          y: () => -(window.innerHeight + 380),
-          ease: 'power1.inOut',
-          duration: 1.8,
+          y: () => {
+            const el = document.getElementById('third-section');
+            if (el && section2ContentRef.current) {
+              const contentTop = section2ContentRef.current.getBoundingClientRect().top;
+              const sectionTop = el.getBoundingClientRect().top;
+              return -(sectionTop - contentTop - 20);
+            }
+            return -(window.innerHeight * 0.72);
+          },
+          ease: 'power2.inOut',
+          duration: 0.9,
         },
-        4.8
+        1.8
       );
 
-      // 5. SECTION 3 TOOLS GRID DWELL (6.6 to 7.8) - Tools grid settled and interactive
-      tl.to({}, { duration: 1.2 }, 6.6);
+      // 5. SECTION 3 TOOLS GRID DWELL (2.7 to 3.5) - comfortable viewing time
+      tl.to({}, { duration: 0.8 }, 2.7);
 
-      // 6. CONTINUOUS SCROLL TO PROJECT SECTION (7.8 to 9.6) - Hands tablet moves to full screen
+      // 6. STAGGERED FADE OUT - Section 3 elements dissolve progressively
+      // 6a. Left column (heading + description) fades out first
+      tl.to('.tools-left-content', {
+        opacity: 0, y: -35, ease: 'power2.in', duration: 0.35,
+      }, 3.5);
+
+      // 6b. Individual tool boxes stagger out from bottom to top
+      tl.to('.tool-box-card', {
+        opacity: 0, y: -20, ease: 'power2.in', duration: 0.3,
+        stagger: { each: 0.06, from: 'end' },
+      }, 3.8);
+
+      // 6c. Overall section 3 container fade (catches all decorative elements)
+      tl.to('#third-section-content', {
+        opacity: 0, ease: 'power2.in', duration: 0.8,
+      }, 3.8);
+
+      // 7. SCROLL content up to Section 4 position (runs parallel to fade-out)
       tl.to(
         section2ContentRef.current,
         {
-          y: () => -(window.innerHeight + 1180),
-          ease: 'power1.inOut',
-          duration: 1.8,
+          y: () => {
+            const el = document.getElementById('fourth-section');
+            if (el && section2ContentRef.current) {
+              const contentTop = section2ContentRef.current.getBoundingClientRect().top;
+              const sectionTop = el.getBoundingClientRect().top;
+              return -(sectionTop - contentTop - 40);
+            }
+            return -(window.innerHeight * 2.6);
+          },
+          ease: 'power2.inOut',
+          duration: 1.4,
         },
-        7.8
+        3.8
       );
 
-      // 7. PROJECT SECTION PINNED DWELL (9.6 to 11.0)
-      tl.to({}, { duration: 1.4 }, 9.6);
+      // 8. STAGGERED FADE IN - Section 4 elements appear one by one
+      // 8a. "04 // PROJECTS" badge fades in
+      tl.to('.fourth-section-badge', {
+        opacity: 1, y: 0, ease: 'power2.out', duration: 0.25,
+      }, 4.8);
+
+      // 8b. "Projects" title fades in
+      tl.to('.fourth-section-title', {
+        opacity: 1, y: 0, ease: 'power2.out', duration: 0.3,
+      }, 5.0);
+
+      // 8c. Description text fades in
+      tl.to('.fourth-section-desc', {
+        opacity: 1, y: 0, ease: 'power2.out', duration: 0.25,
+      }, 5.2);
+
+      // 8d. Hands/tablet artwork rises in from bottom
+      tl.to('.fourth-section-hands', {
+        opacity: 1, y: 0, scale: 1, ease: 'power2.out', duration: 0.4,
+      }, 5.4);
+
+      // 9. SECTION 4 PINNED SHOWCASE HOLD (5.8 to 7.0)
+      tl.to({}, { duration: 1.2 }, 5.8);
     }, runwayRef);
 
     return () => ctx.revert();
@@ -383,14 +438,14 @@ export const PortfolioSection: React.FC<{
     <section
       ref={runwayRef}
       id="portfolio-section"
-      className="relative z-10 w-full h-[1100vh] bg-[#000000]"
+      className="relative z-10 w-full h-[700vh] bg-[#000000]"
     >
       {/* STICKY FULL-SCREEN VIEWPORT CONTAINER - STAYS STILL ON PURE BLACK */}
       <div className="sticky top-0 w-full h-screen flex items-center justify-center overflow-hidden bg-[#000000]">
         {/* SECTION 2 STAGE: 100% Pure Black End-to-End, top-aligned in previous exact location */}
         <div
           ref={section2CardRef}
-          className="w-full h-full bg-[#000000] text-white py-6 sm:py-8 md:py-9 lg:py-10 flex flex-col justify-start overflow-hidden relative z-10 will-change-transform"
+          className="w-full h-full bg-[#000000] text-white pt-6 sm:pt-8 md:pt-9 lg:pt-10 pb-0 flex flex-col justify-start overflow-hidden relative z-10 will-change-transform"
         >
           <div
             ref={section2ContentRef}
