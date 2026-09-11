@@ -274,7 +274,7 @@ export const PortfolioSection: React.FC<{
       // 3. DWELL PERIOD (3.6 to 4.8) - Section 2 cards & description fully settled, interactive, clickable
       tl.to({}, { duration: 1.2 }, 3.6);
 
-      // 4. PARALLAX CONTINUOUS SCROLL: Moves up cleanly to Section 3 (4.8 to 6.6)
+      // 4. PARALLAX CONTINUOUS SCROLL: Moves up cleanly to Section 3 Tools Grid (4.8 to 6.6)
       // (Background stays completely still on pure black, NO fade-out / fade-in!)
       tl.to(
         section2ContentRef.current,
@@ -286,8 +286,22 @@ export const PortfolioSection: React.FC<{
         4.8
       );
 
-      // 5. SECTION 3 PINNED FINISH & DWELL (6.6 to 8.2) - Tools grid settled and interactive
-      tl.to({}, { duration: 1.6 }, 6.6);
+      // 5. SECTION 3 TOOLS GRID DWELL (6.6 to 7.8) - Tools grid settled and interactive
+      tl.to({}, { duration: 1.2 }, 6.6);
+
+      // 6. CONTINUOUS SCROLL TO PROJECT SECTION (7.8 to 9.6) - Hands tablet moves to full screen
+      tl.to(
+        section2ContentRef.current,
+        {
+          y: () => -(window.innerHeight + 1180),
+          ease: 'power1.inOut',
+          duration: 1.8,
+        },
+        7.8
+      );
+
+      // 7. PROJECT SECTION PINNED DWELL (9.6 to 11.0)
+      tl.to({}, { duration: 1.4 }, 9.6);
     }, runwayRef);
 
     return () => ctx.revert();
@@ -369,71 +383,74 @@ export const PortfolioSection: React.FC<{
     <section
       ref={runwayRef}
       id="portfolio-section"
-      className="relative z-10 w-full h-[800vh] bg-[#000000]"
+      className="relative z-10 w-full h-[1100vh] bg-[#000000]"
     >
       {/* STICKY FULL-SCREEN VIEWPORT CONTAINER - STAYS STILL ON PURE BLACK */}
       <div className="sticky top-0 w-full h-screen flex items-center justify-center overflow-hidden bg-[#000000]">
         {/* SECTION 2 STAGE: 100% Pure Black End-to-End, top-aligned in previous exact location */}
         <div
           ref={section2CardRef}
-          className="w-full h-full bg-[#000000] text-white px-6 sm:px-10 md:px-12 lg:px-16 xl:px-20 py-6 sm:py-8 md:py-9 lg:py-10 flex flex-col justify-start overflow-hidden relative z-10 will-change-transform"
+          className="w-full h-full bg-[#000000] text-white py-6 sm:py-8 md:py-9 lg:py-10 flex flex-col justify-start overflow-hidden relative z-10 will-change-transform"
         >
           <div
             ref={section2ContentRef}
-            className="w-full max-w-[1720px] mx-auto flex flex-col justify-start will-change-transform"
+            className="w-full flex flex-col justify-start will-change-transform"
           >
-            {/* 1. DYNAMIC HEADER & PUNCHLINE */}
-            <div
-              ref={section2HeaderRef}
-              className="w-full will-change-transform origin-top-left flex-shrink-0"
-            >
-              <h2
-                className="text-[30px] sm:text-[40px] md:text-[48px] lg:text-[54px] font-bold text-white tracking-[-0.03em] leading-[1.08] select-none"
-                style={{ fontFamily: 'var(--font-heading)' }}
+            {/* SECTION 2 CONTENT CONTAINER */}
+            <div className="w-full max-w-[1720px] mx-auto px-6 sm:px-10 md:px-12 lg:px-16 xl:px-20 flex flex-col justify-start">
+              {/* 1. DYNAMIC HEADER & PUNCHLINE */}
+              <div
+                ref={section2HeaderRef}
+                className="w-full will-change-transform origin-top-left flex-shrink-0"
               >
-                Built for Fast Moving
-                <br />
-                Teams That Need Control.
-              </h2>
+                <h2
+                  className="text-[30px] sm:text-[40px] md:text-[48px] lg:text-[54px] font-bold text-white tracking-[-0.03em] leading-[1.08] select-none"
+                  style={{ fontFamily: 'var(--font-heading)' }}
+                >
+                  Built for Fast Moving
+                  <br />
+                  Teams That Need Control.
+                </h2>
 
-              <p className="text-white/60 text-[14px] sm:text-[16px] md:text-[17px] leading-relaxed max-w-3xl mt-2 select-none">
-                Turning complex operational data into automated BI dashboards, scalable ETL
-                pipelines, and actionable decisions.
-              </p>
+                <p className="text-white/60 text-[14px] sm:text-[16px] md:text-[17px] leading-relaxed max-w-3xl mt-2 select-none">
+                  Turning complex operational data into automated BI dashboards, scalable ETL
+                  pipelines, and actionable decisions.
+                </p>
+              </div>
+
+              {/* 2. THE 4 METRIC BOXES: Restored to their original position right below header */}
+              <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mt-6 sm:mt-8 items-stretch">
+                {cards.map((card, idx) => {
+                  const isVisible =
+                    idx === 0
+                      ? activeCards.card1
+                      : idx === 1
+                      ? activeCards.card2
+                      : idx === 2
+                      ? activeCards.card3
+                      : activeCards.card4;
+
+                  return (
+                    <BigMetricBox
+                      key={card.id}
+                      card={card}
+                      index={idx}
+                      isVisible={isVisible}
+                      onSelect={(c) => setSelectedCard(c)}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* 3. EXPERIENCE & WORK DESCRIPTION */}
+              <div className="footprint-wrapper w-full mt-6 sm:mt-8 md:mt-10 select-none">
+                <p className="text-white/50 text-[14px] sm:text-[15px] md:text-[16px] leading-relaxed max-w-3xl font-normal">
+                  Over 3+ years architecting automated BI platforms, scalable cloud data pipelines, and decision-support systems for enterprise clients and cross-functional teams worldwide.
+                </p>
+              </div>
             </div>
 
-            {/* 2. THE 4 METRIC BOXES: Restored to their original position right below header */}
-            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mt-6 sm:mt-8 items-stretch">
-              {cards.map((card, idx) => {
-                const isVisible =
-                  idx === 0
-                    ? activeCards.card1
-                    : idx === 1
-                    ? activeCards.card2
-                    : idx === 2
-                    ? activeCards.card3
-                    : activeCards.card4;
-
-                return (
-                  <BigMetricBox
-                    key={card.id}
-                    card={card}
-                    index={idx}
-                    isVisible={isVisible}
-                    onSelect={(c) => setSelectedCard(c)}
-                  />
-                );
-              })}
-            </div>
-
-            {/* 3. EXPERIENCE & WORK DESCRIPTION */}
-            <div className="footprint-wrapper w-full mt-6 sm:mt-8 md:mt-10 select-none">
-              <p className="text-white/50 text-[14px] sm:text-[15px] md:text-[16px] leading-relaxed max-w-3xl font-normal">
-                Over 3+ years architecting automated BI platforms, scalable cloud data pipelines, and decision-support systems for enterprise clients and cross-functional teams worldwide.
-              </p>
-            </div>
-
-            {/* 4. SECTION 3: PROFESSIONAL TOOLS & TECH STACK - DIRECTLY BELOW WITH DECENT PADDING & GAP */}
+            {/* 4. SECTION 3: PROFESSIONAL TOOLS & TECH STACK - DIRECTLY BELOW WITH END-TO-END AURA EFFECT */}
             <div
               id="third-section"
               className="tools-section-block w-full mt-48 sm:mt-64 select-none will-change-transform"

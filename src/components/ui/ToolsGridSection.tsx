@@ -9,7 +9,7 @@ import logo7Url from '../../assets/logos/logo-dotted-7.svg';
 import logo8Url from '../../assets/logos/logo-dotted-8.svg';
 import logo9Url from '../../assets/logos/logo-dotted-9.svg';
 import scalableTextUrl from '../../assets/logos/text-scalable.svg';
-import descHalftoneUrl from '../../assets/logos/text-toolstack-desc.svg';
+import handsDeviceSvg from '../../assets/hands-device-frame.svg';
 
 export interface ToolItem {
   id: string;
@@ -74,85 +74,181 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
   tools = defaultTools,
 }) => {
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 pt-0 pb-12 flex flex-col lg:flex-row items-start justify-between gap-10 lg:gap-14 xl:gap-20 select-none">
-      {/* LEFT: Heading + Halftone Dot-matrix Animated Description */}
-      <div className="tools-left-content w-full lg:w-[40%] xl:w-[38%] flex flex-col justify-start text-left shrink-0 will-change-transform pt-2">
-        <h2
-          className="text-[38px] sm:text-[48px] md:text-[56px] xl:text-[64px] font-bold text-white tracking-[-0.035em] leading-[1.05] mb-6"
-          style={{ fontFamily: 'var(--font-heading)' }}
-        >
-          Tool Stack
-        </h2>
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 pt-0 pb-16 flex flex-col">
+      {/* 1. TOP ROW: Tool Stack Header on Left, 4×3 Bento Grid on Right */}
+      <div className="w-full flex flex-col lg:flex-row items-start justify-between gap-10 lg:gap-14 xl:gap-20">
+        {/* LEFT: Normal readable description text */}
+        <div className="tools-left-content w-full lg:w-[38%] xl:w-[36%] flex flex-col justify-start text-left shrink-0 will-change-transform pt-2 select-text">
+          <h2
+            className="text-[38px] sm:text-[48px] md:text-[56px] xl:text-[64px] font-bold text-white tracking-[-0.035em] leading-[1.05] mb-6"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
+            Tool Stack
+          </h2>
 
-        <div className="w-full max-w-[560px]">
-          <img
-            src={descHalftoneUrl}
-            alt="Every project is built on a carefully selected stack of enterprise-grade tools — from Power BI and SQL Server for analytics, to Snowflake and Azure for scalable cloud infrastructure. These are the technologies I rely on daily to deliver production-ready data solutions."
-            className="w-full h-auto block filter drop-shadow-[0_0_16px_rgba(255,255,255,0.12)] select-none pointer-events-none"
-          />
+          <p className="text-[16px] sm:text-[18px] md:text-[20px] text-white/70 leading-[1.7] font-normal tracking-[-0.01em]">
+            Every project is built on a carefully selected stack of{' '}
+            <span className="text-white font-medium">enterprise-grade tools</span> — from{' '}
+            <span className="text-white font-medium">Power BI</span> and{' '}
+            <span className="text-white font-medium">SQL Server</span> for analytics, to{' '}
+            <span className="text-white font-medium">Snowflake</span> and{' '}
+            <span className="text-white font-medium">Azure</span> for scalable cloud
+            infrastructure. These are the technologies I rely on daily to deliver{' '}
+            <span className="text-white font-medium">production-ready</span> data solutions.
+          </p>
+        </div>
+
+        {/* RIGHT: 4×3 Bento Grid (12 boxes) */}
+        <div className="tools-right-stack w-full lg:w-[62%] xl:w-[64%] flex flex-col items-stretch lg:items-end will-change-transform">
+          <div className="relative w-full">
+            {/* Corner Blueprint Accents */}
+            <div
+              className="absolute -top-3 -right-3 w-6 h-6 border border-white/20 hidden sm:block pointer-events-none"
+              style={hatchedStyle}
+            />
+            <div
+              className="absolute -bottom-3 -left-3 w-6 h-6 border border-white/20 hidden sm:block pointer-events-none"
+              style={hatchedStyle}
+            />
+
+            {/* Outer Blueprint Lines */}
+            <div className="absolute -top-3 left-0 right-0 h-px bg-white/10 pointer-events-none" />
+            <div className="absolute -bottom-3 left-0 right-0 h-px bg-white/10 pointer-events-none" />
+            <div className="absolute -left-3 top-0 bottom-0 w-px bg-white/10 pointer-events-none" />
+            <div className="absolute -right-3 top-0 bottom-0 w-px bg-white/10 pointer-events-none" />
+
+            {/* THE 4×3 GRID */}
+            <div className="relative w-full border border-white/15 bg-[#030304] overflow-hidden">
+              {/* Row 1 */}
+              <div className="grid grid-cols-2 md:grid-cols-4">
+                <ToolBox tool={tools[0]} />
+                <ToolBox tool={tools[1]} isHatched />
+                <ToolBox tool={tools[2]} />
+                <ToolBox tool={tools[3]} isHatched />
+              </div>
+              {/* Row 2 */}
+              <div className="grid grid-cols-2 md:grid-cols-4">
+                <ToolBox tool={tools[4]} isHatched />
+                <ToolBox tool={tools[5]} />
+                <ToolBox tool={tools[6]} isHatched />
+                <ToolBox tool={tools[7]} />
+              </div>
+              {/* Row 3 */}
+              <div className="grid grid-cols-2 md:grid-cols-4">
+                <ToolBox tool={tools[8]} className="col-span-2 md:col-span-1" />
+                <div className="tool-box-card col-span-2 md:col-span-3 relative min-h-[155px] sm:min-h-[180px] md:min-h-[200px] flex items-center justify-center p-4 sm:p-6 md:p-8 border-r border-b border-white/[0.1] bg-[#070709] hover:bg-[#0c0c0f] transition-colors group overflow-hidden">
+                  <img
+                    src={scalableTextUrl}
+                    alt="SCALABLE"
+                    className="w-[90%] max-w-[580px] h-[65%] object-contain filter drop-shadow-[0_0_24px_rgba(255,255,255,0.18)] group-hover:scale-[1.03] transition-transform duration-300 pointer-events-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Corner Intersection Rings */}
+            <span className="absolute -top-1 -left-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
+            <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
+            <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
+            {/* Mid-edge rings */}
+            <span className="hidden md:block absolute -top-1 left-1/4 w-2 h-2 rounded-full border border-white/30 bg-black -translate-x-1/2 pointer-events-none" />
+            <span className="hidden md:block absolute -top-1 left-1/2 w-2 h-2 rounded-full border border-white/30 bg-black -translate-x-1/2 pointer-events-none" />
+            <span className="hidden md:block absolute -top-1 left-3/4 w-2 h-2 rounded-full border border-white/30 bg-black -translate-x-1/2 pointer-events-none" />
+            <span className="hidden md:block absolute -bottom-1 left-1/4 w-2 h-2 rounded-full border border-white/30 bg-black -translate-x-1/2 pointer-events-none" />
+            <span className="hidden md:block absolute -bottom-1 left-1/2 w-2 h-2 rounded-full border border-white/30 bg-black -translate-x-1/2 pointer-events-none" />
+            <span className="hidden md:block absolute -bottom-1 left-3/4 w-2 h-2 rounded-full border border-white/30 bg-black -translate-x-1/2 pointer-events-none" />
+          </div>
         </div>
       </div>
 
-      {/* RIGHT: 4×3 Bento Grid (12 boxes) */}
-      <div className="tools-right-stack w-full lg:w-[60%] xl:w-[62%] flex flex-col items-stretch lg:items-end will-change-transform">
-        <div className="relative w-full">
-          {/* Corner Blueprint Accents */}
-          <div
-            className="absolute -top-3 -right-3 w-6 h-6 border border-white/20 hidden sm:block pointer-events-none"
-            style={hatchedStyle}
-          />
-          <div
-            className="absolute -bottom-3 -left-3 w-6 h-6 border border-white/20 hidden sm:block pointer-events-none"
-            style={hatchedStyle}
-          />
+      {/* 2. SECTION 04: PROJECTS SECTION PLACEMENT
+          - Space between Section 3 and Section 4 slightly increased per user request
+          - Left: From the left end-point till the cloud logo box, hands tablet enlarged to occupy the area
+          - Right: After the cloud logo, the project section title and matter space
+      */}
+      <div
+        id="fourth-section"
+        className="w-full mt-28 sm:mt-36 md:mt-44 pt-4 flex flex-col-reverse lg:flex-row items-center lg:items-start justify-between gap-8 lg:gap-10 xl:gap-14"
+      >
+        {/* LEFT: Hands Tablet Artwork from left end-point extending till the cloud logo box */}
+        <div className="w-full lg:w-[73%] xl:w-[74%] flex items-center justify-start">
+          <div className="relative w-full max-w-[1250px] aspect-[960/515] flex items-center justify-start">
+            {/* Screen Content Layer (inside the tablet frame cutout) */}
+            <div
+              className="absolute z-10 overflow-hidden bg-[#07070a] border border-white/10 rounded-[6px] sm:rounded-[8px] flex flex-col shadow-2xl"
+              style={{
+                left: '21.5%',
+                top: '11.0%',
+                width: '57.0%',
+                height: '81.4%',
+              }}
+            >
+              {/* Screen Top Header */}
+              <div className="w-full h-7 sm:h-8 bg-[#111116] border-b border-white/10 px-3 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-red-500/80" />
+                  <span className="w-2 h-2 rounded-full bg-yellow-500/80" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-500/80" />
+                  <span className="ml-2 text-[10px] font-mono text-white/40 uppercase tracking-wider">
+                    project://workspace
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                  STANDBY
+                </div>
+              </div>
 
-          {/* Outer Blueprint Lines */}
-          <div className="absolute -top-3 left-0 right-0 h-px bg-white/10 pointer-events-none" />
-          <div className="absolute -bottom-3 left-0 right-0 h-px bg-white/10 pointer-events-none" />
-          <div className="absolute -left-3 top-0 bottom-0 w-px bg-white/10 pointer-events-none" />
-          <div className="absolute -right-3 top-0 bottom-0 w-px bg-white/10 pointer-events-none" />
+              {/* Screen Body Canvas */}
+              <div className="relative w-full flex-1 p-4 sm:p-6 flex flex-col justify-between bg-radial from-emerald-950/20 via-transparent to-black/90">
+                <div className="space-y-2">
+                  <div className="text-[10px] sm:text-[11px] font-mono text-emerald-400 uppercase tracking-wider">
+                    Active Project Surface
+                  </div>
+                  <h4
+                    className="text-[16px] sm:text-[22px] md:text-[26px] font-bold text-white tracking-tight leading-snug"
+                    style={{ fontFamily: 'var(--font-heading)' }}
+                  >
+                    Interactive Project Display
+                  </h4>
+                  <p className="text-[11px] sm:text-[13px] text-white/60 max-w-md leading-relaxed">
+                    Projects will be showcased directly inside this handheld tablet display.
+                  </p>
+                </div>
 
-          {/* THE 4×3 GRID */}
-          <div className="relative w-full border border-white/15 bg-[#030304] overflow-hidden">
-            {/* Row 1 */}
-            <div className="grid grid-cols-2 md:grid-cols-4">
-              <ToolBox tool={tools[0]} />
-              <ToolBox tool={tools[1]} isHatched />
-              <ToolBox tool={tools[2]} />
-              <ToolBox tool={tools[3]} isHatched />
-            </div>
-            {/* Row 2 */}
-            <div className="grid grid-cols-2 md:grid-cols-4">
-              <ToolBox tool={tools[4]} isHatched />
-              <ToolBox tool={tools[5]} />
-              <ToolBox tool={tools[6]} isHatched />
-              <ToolBox tool={tools[7]} />
-            </div>
-            {/* Row 3 */}
-            <div className="grid grid-cols-2 md:grid-cols-4">
-              <ToolBox tool={tools[8]} className="col-span-2 md:col-span-1" />
-              <div className="tool-box-card col-span-2 md:col-span-3 relative min-h-[155px] sm:min-h-[180px] md:min-h-[200px] flex items-center justify-center p-4 sm:p-6 md:p-8 border-r border-b border-white/[0.1] bg-[#070709] hover:bg-[#0c0c0f] transition-colors group overflow-hidden">
-                <img
-                  src={scalableTextUrl}
-                  alt="SCALABLE"
-                  className="w-[90%] max-w-[580px] h-[65%] object-contain filter drop-shadow-[0_0_24px_rgba(255,255,255,0.18)] group-hover:scale-[1.03] transition-transform duration-300 pointer-events-none"
-                />
+                {/* Status Bar */}
+                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[9px] sm:text-[10px] font-mono text-white/40">
+                  <span>CANVAS: 960 × 515</span>
+                  <span className="text-emerald-400 font-semibold">READY FOR CONTENT</span>
+                </div>
               </div>
             </div>
+
+            {/* Halftone Hands Tablet Frame Overlay */}
+            <img
+              src={handsDeviceSvg}
+              alt="Hands Holding Tablet"
+              className="absolute inset-0 w-full h-full object-contain object-left pointer-events-none z-20 select-none filter drop-shadow-[0_25px_60px_rgba(0,0,0,0.95)]"
+            />
+          </div>
+        </div>
+
+        {/* RIGHT: After the cloud logo, the clean title & project matter space */}
+        <div className="w-full lg:w-[27%] xl:w-[26%] flex flex-col items-start justify-start text-left pt-2 lg:pt-6 shrink-0">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 mb-4">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[11px] sm:text-[12px] font-mono uppercase tracking-widest text-emerald-400 font-semibold">
+              04 // PROJECTS
+            </span>
           </div>
 
-          {/* Corner Intersection Rings */}
-          <span className="absolute -top-1 -left-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
-          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
-          <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
-          <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
-          {/* Mid-edge rings */}
-          <span className="hidden md:block absolute -top-1 left-1/4 w-2 h-2 rounded-full border border-white/30 bg-black -translate-x-1/2 pointer-events-none" />
-          <span className="hidden md:block absolute -top-1 left-1/2 w-2 h-2 rounded-full border border-white/30 bg-black -translate-x-1/2 pointer-events-none" />
-          <span className="hidden md:block absolute -top-1 left-3/4 w-2 h-2 rounded-full border border-white/30 bg-black -translate-x-1/2 pointer-events-none" />
-          <span className="hidden md:block absolute -bottom-1 left-1/4 w-2 h-2 rounded-full border border-white/30 bg-black -translate-x-1/2 pointer-events-none" />
-          <span className="hidden md:block absolute -bottom-1 left-1/2 w-2 h-2 rounded-full border border-white/30 bg-black -translate-x-1/2 pointer-events-none" />
-          <span className="hidden md:block absolute -bottom-1 left-3/4 w-2 h-2 rounded-full border border-white/30 bg-black -translate-x-1/2 pointer-events-none" />
+          <h3
+            className="text-[36px] sm:text-[46px] md:text-[54px] lg:text-[62px] font-bold text-white tracking-[-0.035em] leading-[1.05]"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
+            Projects
+          </h3>
         </div>
       </div>
     </div>
