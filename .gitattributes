@@ -1,2 +1,2 @@
-public/final-video.mp4 filter=lfs diff=lfs merge=lfs -text
-public/technicalhub-insights.mp4 filter=lfs diff=lfs merge=lfs -text
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+

@@ -204,7 +204,6 @@ export const JitterTextReveal: React.FC<JitterTextRevealProps> = ({
   as: Component = 'div',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scrollScale, setScrollScale] = useState(JITTER_CONFIG.scrollScaleStart);
   const [isEntered, setIsEntered] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [, setFontReloadTick] = useState(0);
@@ -276,13 +275,16 @@ export const JitterTextReveal: React.FC<JitterTextRevealProps> = ({
     }
   }, [trigger]);
 
+  const scaleWrapperRef = useRef<HTMLDivElement>(null);
+
   // 3. Continuous scroll-linked scale (only if enableScrollScale is true)
+  // Direct compositor transform update via ref = ZERO React re-renders during scroll!
   useEffect(() => {
     if (!enableScrollScale) return;
     let rafId: number;
 
     const calculateScale = () => {
-      if (!containerRef.current) return;
+      if (!containerRef.current || !scaleWrapperRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const vh = window.innerHeight || document.documentElement.clientHeight;
 
@@ -293,7 +295,7 @@ export const JitterTextReveal: React.FC<JitterTextRevealProps> = ({
         JITTER_CONFIG.scrollScaleStart -
         progress * (JITTER_CONFIG.scrollScaleStart - JITTER_CONFIG.scrollScaleEnd);
 
-      setScrollScale(currentScale);
+      scaleWrapperRef.current.style.transform = `scale3d(${currentScale.toFixed(4)}, ${currentScale.toFixed(4)}, 1)`;
     };
 
     const handleScrollOrResize = () => {
@@ -304,7 +306,7 @@ export const JitterTextReveal: React.FC<JitterTextRevealProps> = ({
     calculateScale();
 
     window.addEventListener('scroll', handleScrollOrResize, { passive: true });
-    window.addEventListener('resize', handleScrollOrResize);
+    window.addEventListener('resize', handleScrollOrResize, { passive: true });
 
     return () => {
       cancelAnimationFrame(rafId);
@@ -391,9 +393,10 @@ export const JitterTextReveal: React.FC<JitterTextRevealProps> = ({
     >
       {enableScrollScale ? (
         <div
+          ref={scaleWrapperRef}
           className="w-full will-change-transform transform-gpu origin-center"
           style={{
-            transform: `scale(${scrollScale.toFixed(4)})`,
+            transform: `scale3d(${JITTER_CONFIG.scrollScaleStart}, ${JITTER_CONFIG.scrollScaleStart}, 1)`,
           }}
         >
           {content}

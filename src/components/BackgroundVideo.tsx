@@ -36,8 +36,9 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = ({ hidden = false
     imagesRef.current = images;
   }, []);
 
-  // Butter-smooth render loop using requestAnimationFrame + LERP
+  // Butter-smooth render loop using requestAnimationFrame + LERP (paused when hidden to maximize scroll FPS)
   useEffect(() => {
+    if (hidden) return;
     let animId: number;
 
     const render = () => {
@@ -84,7 +85,7 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = ({ hidden = false
 
     animId = requestAnimationFrame(render);
     return () => cancelAnimationFrame(animId);
-  }, []);
+  }, [hidden]);
 
   // Resize canvas to match display window
   useEffect(() => {

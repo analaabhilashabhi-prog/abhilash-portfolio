@@ -74,10 +74,10 @@ const BigMetricBox: React.FC<{
   return (
     <div
       onClick={() => onSelect(card)}
-      className={`metric-box-${index} metric-box-card group relative bg-[#121212] hover:bg-[#181818] border border-white/[0.08] hover:border-white/25 rounded-[24px] sm:rounded-[28px] overflow-hidden flex flex-col justify-between h-full cursor-pointer hover:-translate-y-2.5 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.95)] shadow-2xl transition-all duration-300 will-change-transform select-none`}
+      className={`metric-box-${index} metric-box-card group relative bg-[#121212] hover:bg-[#181818] border border-white/[0.08] hover:border-white/25 rounded-[26px] sm:rounded-[30px] md:rounded-[32px] overflow-hidden flex flex-col justify-between h-full cursor-pointer hover:-translate-y-2.5 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.95)] shadow-2xl transition-all duration-300 will-change-transform select-none`}
     >
-      {/* Top Visual Container: Substantial, well-proportioned height */}
-      <div className="relative w-full h-[190px] sm:h-[210px] md:h-[220px] lg:h-[230px] xl:h-[240px] bg-[#0c0c0c] border-b border-white/[0.06] overflow-hidden flex items-center justify-center p-3.5 sm:p-5 select-none">
+      {/* Top Visual Container: Substantial, well-proportioned height with generous padding */}
+      <div className="relative w-full h-[195px] sm:h-[215px] md:h-[225px] lg:h-[235px] xl:h-[245px] bg-[#0c0c0c] border-b border-white/[0.06] overflow-hidden flex items-center justify-center p-4 sm:p-5 md:p-6 select-none">
         <div className="absolute inset-0 bg-radial from-white/[0.04] to-transparent pointer-events-none" />
 
         {/* Subtle Dotted Grid Background behind the graphs */}
@@ -159,12 +159,12 @@ const BigMetricBox: React.FC<{
         )}
       </div>
 
-      {/* Bottom Area: Prominent Count + Title */}
-      <div className="p-5 sm:p-6 flex items-end justify-between gap-3 bg-[#141414]/90 border-t border-white/[0.04]">
+      {/* Bottom Area: Prominent Count + Title with Generous Padding */}
+      <div className="p-6 sm:p-7 md:p-7.5 flex items-end justify-between gap-3.5 bg-[#141414]/90 border-t border-white/[0.04]">
         <div>
           {/* Big Animated Count - Reveals and counts up on scroll 2 */}
           <div
-            className={`text-[34px] sm:text-[38px] md:text-[44px] font-bold text-white tracking-tight leading-none mb-1 select-none transition-all duration-600 transform-gpu ${
+            className={`text-[34px] sm:text-[38px] md:text-[44px] font-bold text-white tracking-tight leading-none mb-2 sm:mb-2.5 select-none transition-all duration-600 transform-gpu ${
               showNumbers
                 ? 'opacity-100 translate-y-0 filter-none'
                 : 'opacity-0 translate-y-3 blur-[4px]'
@@ -181,7 +181,7 @@ const BigMetricBox: React.FC<{
           </h3>
 
           {/* Subtitle / Context */}
-          <div className="text-[11.5px] sm:text-[12.5px] text-white/50 font-normal mt-0.5">
+          <div className="text-[11.5px] sm:text-[12.5px] text-white/50 font-normal mt-1 sm:mt-1.5">
             {card.subtitle}
           </div>
         </div>
@@ -273,52 +273,28 @@ export const PortfolioSection: React.FC<{
         }
       );
 
-      // 3. SECTION 2: PINNED MULTI-STAGE SCROLL SEQUENCE
-      // - Forward: Empty cards on entry -> Scroll 1 graphs -> Scroll 2 numbers -> Scroll 3 next section
-      // - Backward from Section 3: Cards stay fully loaded with graphs and numbers intact (NO FADE-OUT)
+      // 3. SECTION 2: NATURAL UNPINNED SCROLL SEQUENCE (NO STUCK / GLITCH FEELING)
+      // - Cards, graphs, and telemetry populate smoothly as the user reaches the section
+      // - Zero page freeze or pinning so momentum scrolling remains completely fluid
       ScrollTrigger.create({
         trigger: pinEl,
-        start: 'top top',
-        end: '+=1200',
-        pin: true,
-        pinSpacing: true,
-        anticipatePin: 1,
-        onUpdate: (self) => {
-          const isScrollingDown = self.direction === 1;
+        start: 'top 78%',
+        onEnter: () => {
+          setShowGraphs(true);
+        },
+        onLeaveBack: () => {
+          setShowGraphs(false);
+          setShowNumbers(false);
+        },
+      });
 
-          if (isScrollingDown) {
-            // Scrolling down from Hero
-            if (self.progress >= 0.28) {
-              setShowGraphs(true);
-            }
-            if (self.progress >= 0.65) {
-              setShowNumbers(true);
-              hasCompletedSequenceRef.current = true;
-            }
-          } else {
-            // Scrolling backwards (upwards)
-            // Preserve cards with all information and counts intact
-            if (!hasCompletedSequenceRef.current) {
-              setShowNumbers(self.progress >= 0.65);
-              setShowGraphs(self.progress >= 0.28);
-            }
-          }
-        },
-        onLeave: () => {
-          // Passed Section 2 going forward: keep cards, graphs, and numbers fully visible
-          hasCompletedSequenceRef.current = true;
-          setShowGraphs(true);
-          setShowNumbers(true);
-        },
-        onEnterBack: () => {
-          // Re-entering Section 2 from Section 3: keep all information fully populated
-          setShowGraphs(true);
+      ScrollTrigger.create({
+        trigger: pinEl,
+        start: 'top 52%',
+        onEnter: () => {
           setShowNumbers(true);
         },
         onLeaveBack: () => {
-          // Leaving Section 2 out the top into Hero: reset so next forward entry plays fresh sequence
-          hasCompletedSequenceRef.current = false;
-          setShowGraphs(false);
           setShowNumbers(false);
         },
       });
@@ -590,7 +566,7 @@ export const PortfolioSection: React.FC<{
           <div
             ref={metricsSectionRef}
             id="metrics-section"
-            className="w-full h-screen max-h-screen flex flex-col justify-center py-6 sm:py-8"
+            className="w-full min-h-screen flex flex-col justify-center py-10 sm:py-14 md:py-18 lg:py-24"
           >
             {/* 1. DYNAMIC HEADER & PUNCHLINE */}
             <div
@@ -600,7 +576,7 @@ export const PortfolioSection: React.FC<{
               <JitterTextReveal
                 as="h2"
                 text={"Built for Fast Moving\nTeams That Need Control."}
-                className="text-[32px] sm:text-[40px] md:text-[46px] lg:text-[52px] font-bold text-white tracking-[-0.03em] leading-[1.08] select-none"
+                className="text-[32px] sm:text-[40px] md:text-[46px] lg:text-[52px] font-bold text-white tracking-[-0.03em] leading-[1.1] select-none"
                 style={{ fontFamily: 'var(--font-heading)' }}
                 stagger={18}
                 duration={850}
@@ -609,14 +585,14 @@ export const PortfolioSection: React.FC<{
               <JitterTextReveal
                 as="p"
                 text="Turning complex operational data into automated BI dashboards, scalable ETL pipelines, and actionable decisions."
-                className="text-white/60 text-[13.5px] sm:text-[15px] md:text-[16px] leading-relaxed max-w-3xl mt-2 select-none"
+                className="text-white/60 text-[14px] sm:text-[15.5px] md:text-[16.5px] leading-relaxed max-w-3xl mt-3.5 sm:mt-4 md:mt-5 select-none"
                 stagger={10}
                 duration={700}
               />
             </div>
 
-            {/* 2. THE 4 METRIC BOXES */}
-            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mt-5 sm:mt-7 items-stretch">
+            {/* 2. THE 4 METRIC BOXES - Generous gap between cards & from header */}
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7 md:gap-8 xl:gap-9 2xl:gap-10 mt-8 sm:mt-11 md:mt-14 lg:mt-16 xl:mt-20 items-stretch">
               {cards.map((card, idx) => (
                 <BigMetricBox
                   key={card.id}
@@ -629,16 +605,16 @@ export const PortfolioSection: React.FC<{
               ))}
             </div>
 
-            {/* 3. EXPERIENCE & WORK DESCRIPTION */}
+            {/* 3. EXPERIENCE & WORK DESCRIPTION - Generous gap after cards */}
             <div
-              className={`footprint-wrapper w-full mt-5 sm:mt-6 select-none transition-all duration-700 ${
+              className={`footprint-wrapper w-full mt-8 sm:mt-11 md:mt-14 lg:mt-16 xl:mt-18 select-none transition-all duration-700 ${
                 showNumbers ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
               }`}
             >
               <JitterTextReveal
                 as="p"
                 text="Over 3+ years architecting automated BI platforms, scalable cloud data pipelines, and decision-support systems for enterprise clients and cross-functional teams worldwide."
-                className="text-white/50 text-[13px] sm:text-[14px] md:text-[15px] leading-relaxed max-w-3xl font-normal select-none"
+                className="text-white/65 text-[14px] sm:text-[15px] md:text-[16px] leading-[1.8] max-w-4xl font-normal select-none"
                 trigger={showNumbers}
                 stagger={8}
                 duration={650}

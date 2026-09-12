@@ -52,7 +52,7 @@ const ToolBox: React.FC<{ tool?: ToolItem; isHatched?: boolean; className?: stri
   className = '',
 }) => (
   <div
-    className={`tool-box-card relative min-h-[155px] sm:min-h-[180px] md:min-h-[200px] flex items-center justify-center p-4 sm:p-5 border-r border-b border-white/[0.1] ${
+    className={`tool-box-card tool-interactive-card relative min-h-[155px] sm:min-h-[180px] md:min-h-[200px] flex items-center justify-center p-4 sm:p-5 border-r border-b border-white/[0.1] ${
       isHatched ? 'bg-[#040405]' : 'bg-[#070709] hover:bg-[#0c0c0f]'
     } transition-colors group ${className}`}
     style={isHatched ? hatchedStyle : undefined}
@@ -61,13 +61,13 @@ const ToolBox: React.FC<{ tool?: ToolItem; isHatched?: boolean; className?: stri
       <img
         src={tool.src}
         alt={tool.name || 'Tool'}
-        className="w-[75%] h-[75%] max-w-[125px] max-h-[125px] object-contain filter drop-shadow-[0_0_16px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-transform duration-300 pointer-events-none"
+        className="tool-icon-img w-[75%] h-[75%] max-w-[125px] max-h-[125px] object-contain filter drop-shadow-[0_0_16px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-transform duration-300 pointer-events-none"
       />
     ) : (
       <div className="flex flex-col items-center gap-2">
         <span className="text-white/15 text-[20px] font-mono leading-none">&times;</span>
         {tool?.name && (
-          <span className="text-[10px] font-mono text-white/20 tracking-wider uppercase">
+          <span className="tool-name-text text-[10px] font-mono text-white/20 tracking-wider uppercase">
             {tool.name}
           </span>
         )}
@@ -81,11 +81,11 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
   isProjectsIntroActive = false,
   introKey = 0,
 }) => {
-  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const loopIframeRef = React.useRef<HTMLIFrameElement>(null);
   const [isPlaying, setIsPlaying] = React.useState(true);
   const [isMuted, setIsMuted] = React.useState(true);
 
-  const monitorVideoRef = React.useRef<HTMLVideoElement>(null);
+  const monitorIframeRef = React.useRef<HTMLIFrameElement>(null);
   const monitorStageRef = React.useRef<HTMLDivElement>(null);
   const [stageScale, setStageScale] = React.useState(1);
   const [isMonitorPlaying, setIsMonitorPlaying] = React.useState(true);
@@ -123,62 +123,147 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
 
   const togglePlay = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        videoRef.current.play();
-        setIsPlaying(true);
-      } else {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      }
+    if (loopIframeRef.current?.contentWindow) {
+      const nextPlaying = !isPlaying;
+      loopIframeRef.current.contentWindow.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: nextPlaying ? 'playVideo' : 'pauseVideo',
+          args: '',
+        }),
+        '*'
+      );
+      setIsPlaying(nextPlaying);
     }
   };
 
   const toggleMute = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (videoRef.current) {
-      videoRef.current.muted = !videoRef.current.muted;
-      setIsMuted(videoRef.current.muted);
+    if (loopIframeRef.current?.contentWindow) {
+      const nextMuted = !isMuted;
+      loopIframeRef.current.contentWindow.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: nextMuted ? 'mute' : 'unMute',
+          args: '',
+        }),
+        '*'
+      );
+      setIsMuted(nextMuted);
     }
   };
 
   const toggleMonitorPlay = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (monitorVideoRef.current) {
-      if (monitorVideoRef.current.paused) {
-        monitorVideoRef.current.play();
-        setIsMonitorPlaying(true);
-      } else {
-        monitorVideoRef.current.pause();
-        setIsMonitorPlaying(false);
-      }
+    if (monitorIframeRef.current?.contentWindow) {
+      const nextPlaying = !isMonitorPlaying;
+      monitorIframeRef.current.contentWindow.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: nextPlaying ? 'playVideo' : 'pauseVideo',
+          args: '',
+        }),
+        '*'
+      );
+      setIsMonitorPlaying(nextPlaying);
     }
   };
 
   const toggleMonitorMute = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (monitorVideoRef.current) {
-      monitorVideoRef.current.muted = !monitorVideoRef.current.muted;
-      setIsMonitorMuted(monitorVideoRef.current.muted);
+    if (monitorIframeRef.current?.contentWindow) {
+      const nextMuted = !isMonitorMuted;
+      monitorIframeRef.current.contentWindow.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: nextMuted ? 'mute' : 'unMute',
+          args: '',
+        }),
+        '*'
+      );
+      setIsMonitorMuted(nextMuted);
     }
   };
 
   React.useEffect(() => {
-    // Expose helper to window matching user snippet for dynamic video swapping
-    (window as any).setProjectVideo = (url: string) => {
-      const vid = document.getElementById('projectVideo') as HTMLVideoElement;
-      if (vid) {
-        vid.src = url;
-        vid.load();
-        vid.play().catch(() => {});
+    // Expose helpers for dynamic video swapping with YouTube IDs or URLs
+    (window as any).setProjectVideo = (urlOrId: string) => {
+      if (loopIframeRef.current) {
+        const id = urlOrId.includes('youtu')
+          ? urlOrId.split('/').pop()?.split('?')[0]
+          : urlOrId;
+        loopIframeRef.current.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1`;
       }
     };
-    (window as any).setProject2Video = (url: string) => {
-      if (monitorVideoRef.current) {
-        monitorVideoRef.current.src = url;
-        monitorVideoRef.current.load();
-        monitorVideoRef.current.play().catch(() => {});
+    (window as any).setProject2Video = (urlOrId: string) => {
+      if (monitorIframeRef.current) {
+        const id = urlOrId.includes('youtu')
+          ? urlOrId.split('/').pop()?.split('?')[0]
+          : urlOrId;
+        monitorIframeRef.current.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1`;
       }
+    };
+  }, []);
+
+  // RANDOM CYBER GLITCH & STATUS BREATH GLOW ENGINE
+  // Periodically triggers subtle glitch bursts or gentle breathing luminescence across random tool cards
+  React.useEffect(() => {
+    let timeoutId: number;
+    let isCancelled = false;
+
+    const scheduleRandomEffect = () => {
+      // Pick random delay between 1.5s and 3.5s
+      const delay = Math.random() * 2000 + 1500;
+
+      timeoutId = window.setTimeout(() => {
+        if (isCancelled) return;
+
+        const allCards = Array.from(
+          document.querySelectorAll('.tool-interactive-card')
+        );
+
+        if (allCards.length > 0) {
+          // Select 1 to 2 random cards
+          const count = Math.random() > 0.6 ? 2 : 1;
+          const shuffled = allCards.sort(() => 0.5 - Math.random());
+          const selected = shuffled.slice(0, count);
+
+          selected.forEach((card) => {
+            const el = card as HTMLElement;
+            // Prevent clashing if already animating
+            if (
+              el.classList.contains('tool-glitch-active') ||
+              el.classList.contains('tool-glow-active')
+            ) {
+              return;
+            }
+
+            // 55% chance for gentle glow & offing, 45% chance for quick cyber glitch
+            const isGlow = Math.random() > 0.45;
+
+            if (isGlow) {
+              el.classList.add('tool-glow-active');
+              window.setTimeout(() => {
+                el.classList.remove('tool-glow-active');
+              }, 2600);
+            } else {
+              el.classList.add('tool-glitch-active');
+              window.setTimeout(() => {
+                el.classList.remove('tool-glitch-active');
+              }, 340);
+            }
+          });
+        }
+
+        scheduleRandomEffect();
+      }, delay);
+    };
+
+    scheduleRandomEffect();
+
+    return () => {
+      isCancelled = true;
+      window.clearTimeout(timeoutId);
     };
   }, []);
 
@@ -247,11 +332,11 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
               {/* Row 3 */}
               <div className="grid grid-cols-2 md:grid-cols-4">
                 <ToolBox tool={tools[8]} className="col-span-2 md:col-span-1" />
-                <div className="tool-box-card col-span-2 md:col-span-3 relative min-h-[155px] sm:min-h-[180px] md:min-h-[200px] flex items-center justify-center p-4 sm:p-6 md:p-8 border-r border-b border-white/[0.1] bg-[#070709] hover:bg-[#0c0c0f] transition-colors group overflow-hidden">
+                <div className="tool-box-card tool-interactive-card col-span-2 md:col-span-3 relative min-h-[155px] sm:min-h-[180px] md:min-h-[200px] flex items-center justify-center p-4 sm:p-6 md:p-8 border-r border-b border-white/[0.1] bg-[#070709] hover:bg-[#0c0c0f] transition-colors group overflow-hidden">
                   <img
                     src={scalableTextUrl}
                     alt="SCALABLE"
-                    className="w-[90%] max-w-[580px] h-[65%] object-contain filter drop-shadow-[0_0_24px_rgba(255,255,255,0.18)] group-hover:scale-[1.03] transition-transform duration-300 pointer-events-none"
+                    className="tool-icon-img w-[90%] max-w-[580px] h-[65%] object-contain filter drop-shadow-[0_0_24px_rgba(255,255,255,0.18)] group-hover:scale-[1.03] transition-transform duration-300 pointer-events-none"
                   />
                 </div>
               </div>
@@ -348,14 +433,12 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
               }}
               onClick={() => togglePlay()}
             >
-              <video
-                ref={videoRef}
-                src="/final-video.mp4"
-                autoPlay
-                loop
-                muted={isMuted}
-                playsInline
-                className="w-full h-full object-cover select-none"
+              <iframe
+                ref={loopIframeRef}
+                src="https://www.youtube-nocookie.com/embed/Q6wwLcIGRq4?autoplay=1&mute=1&loop=1&playlist=Q6wwLcIGRq4&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1"
+                title="Loop Task Management System Demo"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                className="absolute inset-0 w-full h-full border-0 select-none pointer-events-none scale-[1.25] origin-center"
               />
 
               {/* Subtle dark gradient overlay at bottom for controls visibility */}
@@ -459,7 +542,7 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
                   ].map((item, idx) => (
                     <div
                       key={item.name}
-                      className={`relative min-h-[96px] sm:min-h-[110px] md:min-h-[118px] p-4 sm:p-5 md:p-5.5 flex flex-col justify-between border-r border-b border-white/[0.1] transition-colors group select-none ${
+                      className={`tool-interactive-card relative min-h-[96px] sm:min-h-[110px] md:min-h-[118px] p-4 sm:p-5 md:p-5.5 flex flex-col justify-between border-r border-b border-white/[0.1] transition-colors group select-none ${
                         item.isHatched ? 'bg-[#040405]' : 'bg-[#070709] hover:bg-[#0c0c0f]'
                       }`}
                       style={item.isHatched ? hatchedStyle : undefined}
@@ -468,9 +551,9 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
                         <span className="text-[9px] sm:text-[10px] md:text-[10.5px] font-mono text-white/40 uppercase tracking-wider">
                           0{idx + 1} // {item.category}
                         </span>
-                        <span className="w-1.5 h-1.5 rounded-full bg-white/20 group-hover:bg-emerald-400 transition-colors" />
+                        <span className="tool-dot-indicator w-1.5 h-1.5 rounded-full bg-white/20 group-hover:bg-emerald-400 transition-colors" />
                       </div>
-                      <span className="text-[14.5px] sm:text-[16px] md:text-[17px] font-bold text-white tracking-tight group-hover:text-emerald-300 transition-colors pt-2">
+                      <span className="tool-name-text text-[14.5px] sm:text-[16px] md:text-[17px] font-bold text-white tracking-tight group-hover:text-emerald-300 transition-colors pt-2">
                         {item.name}
                       </span>
                     </div>
@@ -500,15 +583,15 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
       </div>
 
       {/* 5. SECTION 05: SECOND PROJECT SECTION PLACEMENT
-          - Left: Same structure as Project 1 (Dotted Title, Description, Core Stack & Modules Grid)
-          - Right: Halftone Monitor with Perspective Screen Video & Interactive Controls (Shifted a bit right)
+          - Left: Same structure as Project 1 (Dotted Title, Description, Core Stack & Modules Grid) - positioned on left edge end-to-end with decent padding
+          - Right: Halftone Monitor with Perspective Screen Video & Interactive Controls
       */}
       <div
         id="fifth-section"
-        className="fifth-section-block w-screen relative left-1/2 -translate-x-1/2 max-w-[1920px] px-4 sm:px-8 md:px-12 lg:px-14 xl:px-16 2xl:px-20 pt-4 sm:pt-6 pb-16 sm:pb-20 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8 xl:gap-12 overflow-visible"
+        className="fifth-section-block w-screen relative left-1/2 -translate-x-1/2 max-w-[1920px] px-6 sm:px-8 md:px-10 lg:px-12 xl:px-16 2xl:px-20 pt-4 sm:pt-6 pb-16 sm:pb-20 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8 xl:gap-12 overflow-hidden"
       >
-        {/* LEFT: Project Details (Same structure as Project 1: Dotted Title, Description, Core Stack & Modules) */}
-        <div className="w-full lg:w-[45%] xl:w-[44%] 2xl:w-[43%] flex flex-col justify-start text-left pt-2 sm:pt-4 pb-4 shrink-0 select-text self-center lg:self-start">
+        {/* LEFT: Project Details (Dotted Title, Description, Core Stack & Modules moved more to the left edge) */}
+        <div className="w-full lg:w-[44%] xl:w-[42%] 2xl:w-[40%] flex flex-col justify-start text-left pt-2 sm:pt-4 pb-4 shrink-0 select-text self-center lg:self-start">
           {/* Title - Halftone Dotted Title matching Project 1 structure (1 line or max 2 lines) */}
           <div
             className="fifth-section-title mb-8 sm:mb-10 lg:mb-14 xl:mb-16"
@@ -532,7 +615,7 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
             <JitterTextReveal
               as="p"
               text="Built a comprehensive 10-year analytics dashboard for Technical Hub, transforming years of scattered organizational data into a single, interactive source of truth. Consolidated historical data across programs, certifications, placements, staff growth, power consumption, websites, applications, and key organizational metrics."
-              className="text-[17px] sm:text-[18.5px] md:text-[19.5px] lg:text-[20px] xl:text-[20.5px] text-white/75 leading-[1.85] sm:leading-[1.9] font-normal tracking-[-0.012em] max-w-[720px] xl:max-w-[800px] 2xl:max-w-[880px]"
+              className="text-[17px] sm:text-[18.5px] md:text-[19.5px] lg:text-[20px] xl:text-[20.5px] text-white/75 leading-[1.85] sm:leading-[1.9] font-normal tracking-[-0.012em] max-w-[760px] xl:max-w-[840px] 2xl:max-w-[920px]"
               stagger={8}
               duration={650}
             />
@@ -562,7 +645,7 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
                   ].map((item, idx) => (
                     <div
                       key={item.name}
-                      className={`relative min-h-[96px] sm:min-h-[110px] md:min-h-[118px] p-4 sm:p-5 md:p-5.5 flex flex-col justify-between border-r border-b border-white/[0.1] transition-colors group select-none ${
+                      className={`tool-interactive-card relative min-h-[96px] sm:min-h-[110px] md:min-h-[118px] p-4 sm:p-5 md:p-5.5 flex flex-col justify-between border-r border-b border-white/[0.1] transition-colors group select-none ${
                         item.isHatched ? 'bg-[#040405]' : 'bg-[#070709] hover:bg-[#0c0c0f]'
                       }`}
                       style={item.isHatched ? hatchedStyle : undefined}
@@ -571,9 +654,9 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
                         <span className="text-[9px] sm:text-[10px] md:text-[10.5px] font-mono text-white/40 uppercase tracking-wider">
                           0{idx + 1} // {item.category}
                         </span>
-                        <span className="w-1.5 h-1.5 rounded-full bg-white/20 group-hover:bg-emerald-400 transition-colors" />
+                        <span className="tool-dot-indicator w-1.5 h-1.5 rounded-full bg-white/20 group-hover:bg-emerald-400 transition-colors" />
                       </div>
-                      <span className="text-[14.5px] sm:text-[16px] md:text-[17px] font-bold text-white tracking-tight group-hover:text-emerald-300 transition-colors pt-2">
+                      <span className="tool-name-text text-[14.5px] sm:text-[16px] md:text-[17px] font-bold text-white tracking-tight group-hover:text-emerald-300 transition-colors pt-2">
                         {item.name}
                       </span>
                     </div>
@@ -613,25 +696,21 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
                 }}
                 onClick={() => toggleMonitorPlay()}
               >
-                {/* 3D Perspective Tilted Video:
+                {/* 3D Perspective Tilted Video from YouTube:
                     Transformed by projective matrix3d mapping standard 1000x625 (16:10) desktop screen
                     to the exact tilted 3D plane and foreshortened quad with a thin sleek right bezel */}
-                <video
-                  ref={monitorVideoRef}
+                <iframe
+                  ref={monitorIframeRef}
                   id="projectVideo"
-                  src="/technicalhub-insights.mp4"
-                  autoPlay
-                  loop
-                  muted={isMonitorMuted}
-                  playsInline
-                  className="absolute top-0 left-0 w-[1000px] h-[625px] object-cover bg-black select-none pointer-events-none"
+                  src="https://www.youtube-nocookie.com/embed/zWx6pSXDvbA?autoplay=1&mute=1&loop=1&playlist=zWx6pSXDvbA&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1"
+                  title="Technical Hub - 10-Year Analytics Dashboard"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  className="absolute top-0 left-0 w-[1000px] h-[625px] border-0 bg-black select-none pointer-events-none"
                   style={{
                     transformOrigin: '0 0',
                     transform: 'matrix3d(0.508655046, -0.101240865, 0, -0.000007957, -0.079403224, 0.474253839, 0, -0.000071710, 0, 0, 1, 0, 227.520000, 121.296000, 0, 1)',
                   }}
-                >
-                  <source src="/technicalhub-insights.mp4" type="video/mp4" />
-                </video>
+                />
 
                 {/* Subtle Realistic 3D Glass Screen Reflection Glare */}
                 <div

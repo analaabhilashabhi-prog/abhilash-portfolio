@@ -41,7 +41,6 @@ export const Hero: React.FC<HeroProps> = ({ onExplore }) => {
           y: -180,
           opacity: 0,
           scale: 0.92,
-          filter: 'blur(8px)',
           ease: 'none',
         });
       }

@@ -15,12 +15,15 @@ export const App: React.FC = () => {
   const [isScrolledPastHero, setIsScrolledPastHero] = useState(false);
 
   useEffect(() => {
-    // Sublevel Studio inspired smooth momentum scrolling engine
+    // Butter-smooth momentum scrolling engine
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1.1,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
       smoothWheel: true,
-      touchMultiplier: 1.5,
+      wheelMultiplier: 1,
+      touchMultiplier: 1,
     });
 
     lenis.on('scroll', ScrollTrigger.update);
@@ -30,7 +33,6 @@ export const App: React.FC = () => {
     };
 
     gsap.ticker.add(updateTicker);
-    gsap.ticker.lagSmoothing(0);
 
     return () => {
       gsap.ticker.remove(updateTicker);
@@ -40,8 +42,7 @@ export const App: React.FC = () => {
 
   return (
     <main
-      className="relative min-h-screen w-full text-black"
-      style={{ backgroundColor: '#a6a3a4' }}
+      className="relative min-h-screen w-full bg-[#000000] text-black overflow-x-hidden"
     >
       {/* Full-screen butter-smooth frame scrubber (completely hidden when scrolled past Hero) */}
       <BackgroundVideo hidden={isScrolledPastHero} />
