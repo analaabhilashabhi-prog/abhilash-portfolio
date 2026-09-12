@@ -18,6 +18,7 @@
 
     /* Paths */
     "paths": {
+      "@/*": ["./src/*"],
       "@designcodeio/threeui": ["./src/shaders/index.ts"],
       "@designcodeio/threeui/*": ["./src/shaders/*"]
     }

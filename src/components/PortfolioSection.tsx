@@ -6,6 +6,7 @@ import { MetricChoroplethCard } from './ui/ChoroplethChart';
 import { MetricSunburstCard } from './ui/SunburstChart';
 import { MetricGaugeCard } from './ui/GaugeChart';
 import { ToolsGridSection } from './ui/ToolsGridSection';
+import { JitterTextReveal } from './ui/JitterTextReveal';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -57,22 +58,26 @@ const useCountUp = (target: number, duration: number = 1000, trigger: boolean = 
   return count;
 };
 
-// Sub-component for each of the 4 Big Boxes
+// Sub-component for each of the 4 Big Boxes with phased reveals:
+// 1. Empty card shell loads first
+// 2. Graphs animate in on next scroll
+// 3. Numbers animate in & count up on next scroll
 const BigMetricBox: React.FC<{
   card: MetricCard;
   index: number;
-  isVisible: boolean;
+  showGraphs: boolean;
+  showNumbers: boolean;
   onSelect: (card: MetricCard) => void;
-}> = ({ card, index, isVisible, onSelect }) => {
-  const animatedNumber = useCountUp(card.targetNumber, 1000, isVisible);
+}> = ({ card, index, showGraphs, showNumbers, onSelect }) => {
+  const animatedNumber = useCountUp(card.targetNumber, 1000, showNumbers);
 
   return (
     <div
       onClick={() => onSelect(card)}
-      className={`metric-box-${index} group relative bg-[#121212] hover:bg-[#181818] border border-white/[0.08] hover:border-white/25 rounded-[24px] sm:rounded-[28px] overflow-hidden flex flex-col justify-between h-full cursor-pointer hover:-translate-y-2.5 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.95)] shadow-2xl transition-all duration-300 will-change-transform select-none`}
+      className={`metric-box-${index} metric-box-card group relative bg-[#121212] hover:bg-[#181818] border border-white/[0.08] hover:border-white/25 rounded-[24px] sm:rounded-[28px] overflow-hidden flex flex-col justify-between h-full cursor-pointer hover:-translate-y-2.5 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.95)] shadow-2xl transition-all duration-300 will-change-transform select-none`}
     >
       {/* Top Visual Container: Substantial, well-proportioned height */}
-      <div className="relative w-full h-[200px] sm:h-[215px] md:h-[225px] lg:h-[235px] xl:h-[245px] bg-[#0c0c0c] border-b border-white/[0.06] overflow-hidden flex items-center justify-center p-3.5 sm:p-5 select-none">
+      <div className="relative w-full h-[190px] sm:h-[210px] md:h-[220px] lg:h-[230px] xl:h-[240px] bg-[#0c0c0c] border-b border-white/[0.06] overflow-hidden flex items-center justify-center p-3.5 sm:p-5 select-none">
         <div className="absolute inset-0 bg-radial from-white/[0.04] to-transparent pointer-events-none" />
 
         {/* Subtle Dotted Grid Background behind the graphs */}
@@ -94,37 +99,62 @@ const BigMetricBox: React.FC<{
           <img
             src={card.imageSrc}
             alt={card.title}
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            className={`w-full h-full object-cover object-center group-hover:scale-105 transition-all duration-700 ${
+              showGraphs ? 'opacity-100 scale-100 filter-none' : 'opacity-0 scale-90 blur-[4px]'
+            }`}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center relative">
-            {/* BOX 1: 3+ Years Analytics Bar Chart with Thick Bars */}
-            {index === 0 && (
-              <div className="box-graphic-0 w-full h-full flex items-center justify-center p-1 will-change-transform">
-                <MetricBarChartCard isVisible={isVisible} />
+            {/* Standby placeholder when empty cards are loaded */}
+            <div
+              className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-500 ${
+                showGraphs ? 'opacity-0' : 'opacity-100'
+              }`}
+            >
+              <div className="flex flex-col items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-white/20 animate-pulse" />
+                <span className="text-[9.5px] font-mono text-white/25 uppercase tracking-widest">
+                  Telemetry
+                </span>
               </div>
-            )}
+            </div>
 
-            {/* BOX 2: 5 Global Certifications Choropleth Map Chart */}
-            {index === 1 && (
-              <div className="box-graphic-1 w-full h-full flex items-center justify-center p-1 will-change-transform">
-                <MetricChoroplethCard isVisible={isVisible} />
-              </div>
-            )}
+            {/* Graphs Layer - Reveals and runs entrance animation on scroll 1 */}
+            <div
+              className={`w-full h-full flex items-center justify-center transition-all duration-700 transform-gpu ${
+                showGraphs
+                  ? 'opacity-100 scale-100 filter-none'
+                  : 'opacity-0 scale-90 blur-[6px] pointer-events-none'
+              }`}
+            >
+              {/* BOX 1: 3+ Years Analytics Bar Chart with Thick Bars */}
+              {index === 0 && (
+                <div className="box-graphic-0 w-full h-full flex items-center justify-center p-1 will-change-transform">
+                  <MetricBarChartCard isVisible={showGraphs} />
+                </div>
+              )}
 
-            {/* BOX 3: 50+ BI Solutions Sunburst Chart */}
-            {index === 2 && (
-              <div className="box-graphic-2 w-full h-full flex items-center justify-center p-1 will-change-transform">
-                <MetricSunburstCard isVisible={isVisible} />
-              </div>
-            )}
+              {/* BOX 2: 5 Global Certifications Choropleth Map Chart */}
+              {index === 1 && (
+                <div className="box-graphic-1 w-full h-full flex items-center justify-center p-1 will-change-transform">
+                  <MetricChoroplethCard isVisible={showGraphs} />
+                </div>
+              )}
 
-            {/* BOX 4: 300K+ Records Data Pipeline Gauge Chart */}
-            {index === 3 && (
-              <div className="box-graphic-3 w-full h-full flex items-center justify-center p-1 will-change-transform">
-                <MetricGaugeCard isVisible={isVisible} />
-              </div>
-            )}
+              {/* BOX 3: 50+ BI Solutions Sunburst Chart */}
+              {index === 2 && (
+                <div className="box-graphic-2 w-full h-full flex items-center justify-center p-1 will-change-transform">
+                  <MetricSunburstCard isVisible={showGraphs} />
+                </div>
+              )}
+
+              {/* BOX 4: 300K+ Records Data Pipeline Gauge Chart */}
+              {index === 3 && (
+                <div className="box-graphic-3 w-full h-full flex items-center justify-center p-1 will-change-transform">
+                  <MetricGaugeCard isVisible={showGraphs} />
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -132,12 +162,16 @@ const BigMetricBox: React.FC<{
       {/* Bottom Area: Prominent Count + Title */}
       <div className="p-5 sm:p-6 flex items-end justify-between gap-3 bg-[#141414]/90 border-t border-white/[0.04]">
         <div>
-          {/* Big Animated Count */}
+          {/* Big Animated Count - Reveals and counts up on scroll 2 */}
           <div
-            className="text-[34px] sm:text-[38px] md:text-[44px] font-bold text-white tracking-tight leading-none mb-1 select-none"
+            className={`text-[34px] sm:text-[38px] md:text-[44px] font-bold text-white tracking-tight leading-none mb-1 select-none transition-all duration-600 transform-gpu ${
+              showNumbers
+                ? 'opacity-100 translate-y-0 filter-none'
+                : 'opacity-0 translate-y-3 blur-[4px]'
+            }`}
             style={{ fontFamily: 'var(--font-heading)' }}
           >
-            {animatedNumber}
+            {showNumbers ? animatedNumber : 0}
             {card.suffix}
           </div>
 
@@ -176,174 +210,293 @@ export const PortfolioSection: React.FC<{
   onScrollProgress?: (progress: number) => void;
 }> = ({ onScrollProgress }) => {
   const runwayRef = useRef<HTMLElement>(null);
-  const section2CardRef = useRef<HTMLDivElement>(null);
+  const section2PinRef = useRef<HTMLDivElement>(null);
+  const metricsSectionRef = useRef<HTMLDivElement>(null);
   const section2HeaderRef = useRef<HTMLDivElement>(null);
-  const section2ContentRef = useRef<HTMLDivElement>(null);
 
-  const [activeCards, setActiveCards] = useState({
-    card1: false,
-    card2: false,
-    card3: false,
-    card4: false,
-  });
+  const [showGraphs, setShowGraphs] = useState(false);
+  const [showNumbers, setShowNumbers] = useState(false);
+  const hasCompletedSequenceRef = useRef(false);
 
   const [selectedCard, setSelectedCard] = useState<MetricCard | null>(null);
+  const [isProjectsIntroActive, setIsProjectsIntroActive] = useState(false);
+  const [introKey, setIntroKey] = useState(0);
+  const currentZoneRef = useRef<'tools' | 'intro' | 'projects' | 'other'>('other');
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: runwayRef.current,
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: 0.8, // Film-grade continuous responsiveness locked with Lenis
-          onUpdate: (self) => {
-            const p = self.progress;
-            setActiveCards({
-              card1: p >= 0.06,
-              card2: p >= 0.12,
-              card3: p >= 0.18,
-              card4: p >= 0.24,
-            });
-            if (onScrollProgress) {
-              onScrollProgress(p);
-            }
-          },
+      // 1. Overall scroll tracking to hide Hero background video/navbar
+      ScrollTrigger.create({
+        trigger: runwayRef.current,
+        start: 'top 75%',
+        onUpdate: (self) => {
+          if (onScrollProgress) {
+            onScrollProgress(self.progress);
+          }
         },
       });
 
-      // SET INITIAL STATES: Section 4 elements start hidden
-      gsap.set('.fourth-section-title', { opacity: 0, y: 35 });
-      gsap.set('.fourth-section-desc', { opacity: 0, y: 25 });
-      gsap.set('.fourth-section-hands', { opacity: 0, y: 60, scale: 0.96 });
+      const pinEl = section2PinRef.current || metricsSectionRef.current || '#metrics-section';
 
-      // 1. SECTION 2 HEADER PARALLAX (0.0 to 0.8)
-      tl.fromTo(
+      // 2. SECTION 2: EMPTY CARDS LOAD ON VIEWPORT ENTRY (NO FADE-OUT ON SCROLL PAST)
+      gsap.fromTo(
         section2HeaderRef.current,
-        { y: 35, opacity: 0 },
-        { y: 0, opacity: 1, ease: 'power3.out', duration: 0.7 },
-        0.0
+        { opacity: 0, y: 35 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: pinEl,
+            start: 'top 82%',
+            toggleActions: 'play none none reverse',
+          },
+        }
       );
 
-      // 2. THE 4 BIG BOXES - STAGGERED PARALLAX ENTRANCE (0.2 to 1.4)
-      tl.fromTo(
-        '.metric-box-0',
-        { y: 60, opacity: 0, scale: 0.96 },
-        { y: 0, opacity: 1, scale: 1, ease: 'power3.out' },
-        0.2
-      );
-      tl.fromTo(
-        '.metric-box-1',
-        { y: 70, opacity: 0, scale: 0.96 },
-        { y: 0, opacity: 1, scale: 1, ease: 'power3.out' },
-        0.38
-      );
-      tl.fromTo(
-        '.metric-box-2',
-        { y: 80, opacity: 0, scale: 0.96 },
-        { y: 0, opacity: 1, scale: 1, ease: 'power3.out' },
-        0.56
-      );
-      tl.fromTo(
-        '.metric-box-3',
-        { y: 90, opacity: 0, scale: 0.96 },
-        { y: 0, opacity: 1, scale: 1, ease: 'power3.out' },
-        0.74
+      gsap.fromTo(
+        '.metric-box-card',
+        { opacity: 0, y: 45, scale: 0.96 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.75,
+          stagger: 0.1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: pinEl,
+            start: 'top 80%',
+            toggleActions: 'play none none reverse',
+          },
+        }
       );
 
-      // Description
-      tl.fromTo(
+      // 3. SECTION 2: PINNED MULTI-STAGE SCROLL SEQUENCE
+      // - Forward: Empty cards on entry -> Scroll 1 graphs -> Scroll 2 numbers -> Scroll 3 next section
+      // - Backward from Section 3: Cards stay fully loaded with graphs and numbers intact (NO FADE-OUT)
+      ScrollTrigger.create({
+        trigger: pinEl,
+        start: 'top top',
+        end: '+=1200',
+        pin: true,
+        pinSpacing: true,
+        anticipatePin: 1,
+        onUpdate: (self) => {
+          const isScrollingDown = self.direction === 1;
+
+          if (isScrollingDown) {
+            // Scrolling down from Hero
+            if (self.progress >= 0.28) {
+              setShowGraphs(true);
+            }
+            if (self.progress >= 0.65) {
+              setShowNumbers(true);
+              hasCompletedSequenceRef.current = true;
+            }
+          } else {
+            // Scrolling backwards (upwards)
+            // Preserve cards with all information and counts intact
+            if (!hasCompletedSequenceRef.current) {
+              setShowNumbers(self.progress >= 0.65);
+              setShowGraphs(self.progress >= 0.28);
+            }
+          }
+        },
+        onLeave: () => {
+          // Passed Section 2 going forward: keep cards, graphs, and numbers fully visible
+          hasCompletedSequenceRef.current = true;
+          setShowGraphs(true);
+          setShowNumbers(true);
+        },
+        onEnterBack: () => {
+          // Re-entering Section 2 from Section 3: keep all information fully populated
+          setShowGraphs(true);
+          setShowNumbers(true);
+        },
+        onLeaveBack: () => {
+          // Leaving Section 2 out the top into Hero: reset so next forward entry plays fresh sequence
+          hasCompletedSequenceRef.current = false;
+          setShowGraphs(false);
+          setShowNumbers(false);
+        },
+      });
+
+      gsap.fromTo(
         '.footprint-wrapper',
-        { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, ease: 'power3.out' },
-        0.85
-      );
-
-      // Micro-parallax inside graphic boxes
-      tl.fromTo('.box-graphic-0', { y: 10 }, { y: 0, ease: 'none' }, 0.3);
-      tl.fromTo('.box-graphic-1', { scale: 0.92, y: 8 }, { scale: 1, y: 0, ease: 'none' }, 0.5);
-      tl.fromTo('.box-graphic-2', { y: 10 }, { y: 0, ease: 'none' }, 0.7);
-      tl.fromTo('.box-graphic-3', { y: 10 }, { y: 0, ease: 'none' }, 0.9);
-
-      // 3. SECTION 2 COMFORTABLE DWELL (1.4 to 1.9)
-      tl.to({}, { duration: 0.5 }, 1.4);
-
-      // 4. SMOOTH GLIDE TO SECTION 3 (1.9 to 2.9)
-      tl.to(
-        section2ContentRef.current,
+        { opacity: 0, y: 20 },
         {
-          y: () => {
-            const el = document.getElementById('third-section');
-            if (el && section2ContentRef.current) {
-              const contentTop = section2ContentRef.current.getBoundingClientRect().top;
-              const sectionTop = el.getBoundingClientRect().top;
-              return -(sectionTop - contentTop - 20);
-            }
-            return -(window.innerHeight * 0.72);
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '.footprint-wrapper',
+            start: 'top 88%',
+            toggleActions: 'play none none reverse',
           },
-          ease: 'power3.inOut',
-          duration: 1.0,
-        },
-        1.9
+        }
       );
 
-      // 5. SECTION 3 TOOLS GRID DWELL (2.9 to 3.8) - comfortable viewing time
-      tl.to({}, { duration: 0.9 }, 2.9);
-
-      // 6. STAGGERED FADE OUT - Section 3 elements dissolve progressively (3.8 to 4.5)
-      // 6a. Left column (heading + description) fades out first
-      tl.to('.tools-left-content', {
-        opacity: 0, y: -30, ease: 'power2.in', duration: 0.35,
-      }, 3.8);
-
-      // 6b. Individual tool boxes stagger out from bottom to top
-      tl.to('.tool-box-card', {
-        opacity: 0, y: -20, ease: 'power2.in', duration: 0.3,
-        stagger: { each: 0.05, from: 'end' },
-      }, 4.0);
-
-      // 6c. Overall section 3 container fade
-      tl.to('#third-section-content', {
-        opacity: 0, ease: 'power2.in', duration: 0.7,
-      }, 4.0);
-
-      // 7. SCROLL content up to Section 4 position (runs parallel to fade-out: 4.1 to 5.5)
-      tl.to(
-        section2ContentRef.current,
+      // 3. SECTION 3: TOOLS STACK REVEAL ON SCROLL (NO FADE-OUT ON SCROLL PAST)
+      gsap.fromTo(
+        '.tools-left-content',
+        { opacity: 0, y: 35 },
         {
-          y: () => {
-            const el = document.getElementById('fourth-section');
-            if (el && section2ContentRef.current) {
-              const contentTop = section2ContentRef.current.getBoundingClientRect().top;
-              const sectionTop = el.getBoundingClientRect().top;
-              return -(sectionTop - contentTop - 12);
-            }
-            return -(window.innerHeight * 2.6);
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '#third-section-content',
+            start: 'top 80%',
+            toggleActions: 'play none none reverse',
           },
-          ease: 'power3.inOut',
-          duration: 1.4,
-        },
-        4.1
+        }
       );
 
-      // 8. STAGGERED FADE IN - Section 4 elements appear with smooth easing
-      // 8a. "Projects" title fades in
-      tl.to('.fourth-section-title', {
-        opacity: 1, y: 0, ease: 'power3.out', duration: 0.4,
-      }, 5.05);
+      gsap.fromTo(
+        '.tool-box-card',
+        { opacity: 0, y: 25 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.55,
+          stagger: 0.04,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '.tools-right-stack',
+            start: 'top 80%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
 
-      // 8b. Description text fades in
-      tl.to('.fourth-section-desc', {
-        opacity: 1, y: 0, ease: 'power3.out', duration: 0.35,
-      }, 5.3);
+      // 4. SECTION 3.5: PROJECTS STATEMENT (DOT ART REVEAL)
+      ScrollTrigger.create({
+        trigger: '#projects-intro-section',
+        start: 'top 75%',
+        end: 'bottom 25%',
+        onEnter: () => {
+          setIntroKey((k) => k + 1);
+          setIsProjectsIntroActive(true);
+        },
+        onEnterBack: () => {
+          setIntroKey((k) => k + 1);
+          setIsProjectsIntroActive(true);
+        },
+        onLeave: () => {
+          setIsProjectsIntroActive(false);
+        },
+        onLeaveBack: () => {
+          setIsProjectsIntroActive(false);
+        },
+      });
 
-      // 8c. Hands/tablet artwork rises in from bottom and docks cleanly
-      tl.to('.fourth-section-hands', {
-        opacity: 1, y: 0, scale: 1, ease: 'power3.out', duration: 0.55,
-      }, 5.55);
+      // 5. SECTION 4: PROJECTS SHOWCASE REVEAL ON SCROLL (NO FADE-OUT ON SCROLL PAST)
+      gsap.fromTo(
+        '.fourth-section-title',
+        { opacity: 0, y: 35 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.65,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '#fourth-section',
+            start: 'top 80%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
 
-      // 9. SECTION 4 PINNED SHOWCASE HOLD (6.1 to 7.6)
-      tl.to({}, { duration: 1.5 }, 6.1);
+      gsap.fromTo(
+        '.fourth-section-desc',
+        { opacity: 0, y: 25 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.65,
+          delay: 0.12,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '#fourth-section',
+            start: 'top 78%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
+
+      gsap.fromTo(
+        '.fourth-section-hands',
+        { opacity: 0, y: 65, scale: 0.95 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.85,
+          delay: 0.2,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '#fourth-section',
+            start: 'top 75%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
+
+      // 6. SECTION 5: SECOND PROJECT SHOWCASE REVEAL (MONITOR ON RIGHT, DETAILS ON LEFT)
+      gsap.fromTo(
+        '.fifth-section-title',
+        { opacity: 0, y: 35 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.65,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '#fifth-section',
+            start: 'top 80%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
+
+      gsap.fromTo(
+        '.fifth-section-desc',
+        { opacity: 0, y: 25 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.65,
+          delay: 0.12,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '#fifth-section',
+            start: 'top 78%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
+
+      gsap.fromTo(
+        '.fifth-section-monitor',
+        { opacity: 0, y: 65, scale: 0.95 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.85,
+          delay: 0.2,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '#fifth-section',
+            start: 'top 75%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
     }, runwayRef);
 
     return () => ctx.revert();
@@ -421,86 +574,99 @@ export const PortfolioSection: React.FC<{
   ];
 
   return (
-    /* MASTER GSAP SCROLL RUNWAY: Pure black (#000000) end-to-end */
+    /* MASTER PORTFOLIO CONTAINER: Pure black (#000000) natural flow with reference-grade spacing */
     <section
       ref={runwayRef}
       id="portfolio-section"
-      className="relative z-10 w-full h-[760vh] bg-[#000000]"
+      className="relative z-10 w-full bg-[#000000] text-white pt-20 sm:pt-28 md:pt-36 pb-20 sm:pb-28 select-none"
     >
-      {/* STICKY FULL-SCREEN VIEWPORT CONTAINER - STAYS STILL ON PURE BLACK */}
-      <div className="sticky top-0 w-full h-screen flex items-center justify-center overflow-hidden bg-[#000000]">
-        {/* SECTION 2 STAGE: 100% Pure Black End-to-End, top-aligned in previous exact location */}
+      <div className="w-full max-w-[1720px] mx-auto px-6 sm:px-10 md:px-12 lg:px-16 xl:px-20 flex flex-col justify-start">
+        {/* SECTION 2: IMPACT METRICS CONTAINER (PINNED MULTI-STEP SEQUENCE) */}
         <div
-          ref={section2CardRef}
-          className="w-full h-full bg-[#000000] text-white pt-6 sm:pt-8 md:pt-9 lg:pt-10 pb-0 flex flex-col justify-start overflow-hidden relative z-10 will-change-transform"
+          ref={section2PinRef}
+          id="metrics-pin-container"
+          className="w-full relative select-none"
         >
           <div
-            ref={section2ContentRef}
-            className="w-full flex flex-col justify-start will-change-transform"
+            ref={metricsSectionRef}
+            id="metrics-section"
+            className="w-full h-screen max-h-screen flex flex-col justify-center py-6 sm:py-8"
           >
-            {/* SECTION 2 CONTENT CONTAINER */}
-            <div className="w-full max-w-[1720px] mx-auto px-6 sm:px-10 md:px-12 lg:px-16 xl:px-20 flex flex-col justify-start">
-              {/* 1. DYNAMIC HEADER & PUNCHLINE */}
-              <div
-                ref={section2HeaderRef}
-                className="w-full will-change-transform origin-top-left flex-shrink-0"
-              >
-                <h2
-                  className="text-[30px] sm:text-[40px] md:text-[48px] lg:text-[54px] font-bold text-white tracking-[-0.03em] leading-[1.08] select-none"
-                  style={{ fontFamily: 'var(--font-heading)' }}
-                >
-                  Built for Fast Moving
-                  <br />
-                  Teams That Need Control.
-                </h2>
-
-                <p className="text-white/60 text-[14px] sm:text-[16px] md:text-[17px] leading-relaxed max-w-3xl mt-2 select-none">
-                  Turning complex operational data into automated BI dashboards, scalable ETL
-                  pipelines, and actionable decisions.
-                </p>
-              </div>
-
-              {/* 2. THE 4 METRIC BOXES: Restored to their original position right below header */}
-              <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mt-6 sm:mt-8 items-stretch">
-                {cards.map((card, idx) => {
-                  const isVisible =
-                    idx === 0
-                      ? activeCards.card1
-                      : idx === 1
-                      ? activeCards.card2
-                      : idx === 2
-                      ? activeCards.card3
-                      : activeCards.card4;
-
-                  return (
-                    <BigMetricBox
-                      key={card.id}
-                      card={card}
-                      index={idx}
-                      isVisible={isVisible}
-                      onSelect={(c) => setSelectedCard(c)}
-                    />
-                  );
-                })}
-              </div>
-
-              {/* 3. EXPERIENCE & WORK DESCRIPTION */}
-              <div className="footprint-wrapper w-full mt-6 sm:mt-8 md:mt-10 select-none">
-                <p className="text-white/50 text-[14px] sm:text-[15px] md:text-[16px] leading-relaxed max-w-3xl font-normal">
-                  Over 3+ years architecting automated BI platforms, scalable cloud data pipelines, and decision-support systems for enterprise clients and cross-functional teams worldwide.
-                </p>
-              </div>
-            </div>
-
-            {/* 4. SECTION 3: PROFESSIONAL TOOLS & TECH STACK - DIRECTLY BELOW WITH END-TO-END AURA EFFECT */}
+            {/* 1. DYNAMIC HEADER & PUNCHLINE */}
             <div
-              id="third-section"
-              className="tools-section-block w-full mt-48 sm:mt-64 select-none will-change-transform"
+              ref={section2HeaderRef}
+              className="w-full origin-top-left flex-shrink-0"
             >
-              <ToolsGridSection />
+              <JitterTextReveal
+                as="h2"
+                text={"Built for Fast Moving\nTeams That Need Control."}
+                className="text-[32px] sm:text-[40px] md:text-[46px] lg:text-[52px] font-bold text-white tracking-[-0.03em] leading-[1.08] select-none"
+                style={{ fontFamily: 'var(--font-heading)' }}
+                stagger={18}
+                duration={850}
+              />
+
+              <JitterTextReveal
+                as="p"
+                text="Turning complex operational data into automated BI dashboards, scalable ETL pipelines, and actionable decisions."
+                className="text-white/60 text-[13.5px] sm:text-[15px] md:text-[16px] leading-relaxed max-w-3xl mt-2 select-none"
+                stagger={10}
+                duration={700}
+              />
             </div>
 
+            {/* 2. THE 4 METRIC BOXES */}
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mt-5 sm:mt-7 items-stretch">
+              {cards.map((card, idx) => (
+                <BigMetricBox
+                  key={card.id}
+                  card={card}
+                  index={idx}
+                  showGraphs={showGraphs}
+                  showNumbers={showNumbers}
+                  onSelect={(c) => setSelectedCard(c)}
+                />
+              ))}
+            </div>
+
+            {/* 3. EXPERIENCE & WORK DESCRIPTION */}
+            <div
+              className={`footprint-wrapper w-full mt-5 sm:mt-6 select-none transition-all duration-700 ${
+                showNumbers ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
+              }`}
+            >
+              <JitterTextReveal
+                as="p"
+                text="Over 3+ years architecting automated BI platforms, scalable cloud data pipelines, and decision-support systems for enterprise clients and cross-functional teams worldwide."
+                className="text-white/50 text-[13px] sm:text-[14px] md:text-[15px] leading-relaxed max-w-3xl font-normal select-none"
+                trigger={showNumbers}
+                stagger={8}
+                duration={650}
+              />
+            </div>
           </div>
+        </div>
+
+        {/* ARCHITECTURAL SECTION DIVIDER (Matching Reference Image with Generous Spacing) */}
+        <div className="w-full my-28 sm:my-36 md:my-44 pointer-events-none select-none">
+          <div className="relative w-full h-px bg-white/10 flex items-center justify-between">
+            <span className="text-[11px] font-mono text-white/30 -translate-y-1/2 bg-[#000000] px-1.5">+</span>
+            <span className="text-[9px] font-mono text-white/25 tracking-[0.2em] uppercase hidden md:inline-block bg-[#000000] px-3">
+              PRODUCTION STACK &bull; CORE ECOSYSTEM
+            </span>
+            <span className="text-[11px] font-mono text-white/30 -translate-y-1/2 bg-[#000000] px-1.5">+</span>
+          </div>
+        </div>
+
+        {/* 4. SECTION 3, 3.5 & 4: PROFESSIONAL TOOLS, INTRO STATEMENT, AND PROJECTS */}
+        <div
+          id="third-section"
+          className="tools-section-block w-full select-none"
+        >
+          <ToolsGridSection
+            isProjectsIntroActive={isProjectsIntroActive}
+            introKey={introKey}
+          />
         </div>
       </div>
 

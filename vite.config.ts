@@ -29,6 +29,7 @@ export default defineConfig({
     alias: {
       '@designcodeio/threeui/style.css': path.resolve(process.cwd(), 'src/shaders/threeui.css'),
       '@designcodeio/threeui': path.resolve(process.cwd(), 'src/shaders/index.ts'),
+      '@': path.resolve(process.cwd(), 'src'),
     },
   },
 })

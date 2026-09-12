@@ -11,6 +11,9 @@ import logo9Url from '../../assets/logos/logo-dotted-9.svg';
 import scalableTextUrl from '../../assets/logos/text-scalable.svg';
 import projectTitleSvg from '../../assets/logos/project-title-dotted.svg';
 import handsDeviceSvg from '../../assets/hands-device-frame.svg';
+import monitorFrameSvg from '../../assets/monitor-halftone-frame.svg';
+import { TextGenerateEffect } from './text-generate-effect';
+import { JitterTextReveal } from './JitterTextReveal';
 
 export interface ToolItem {
   id: string;
@@ -21,6 +24,8 @@ export interface ToolItem {
 
 interface ToolsGridSectionProps {
   tools?: ToolItem[];
+  isProjectsIntroActive?: boolean;
+  introKey?: number;
 }
 
 // 9 tool slots + 1 wide combined banner slot for SCALABLE
@@ -73,10 +78,48 @@ const ToolBox: React.FC<{ tool?: ToolItem; isHatched?: boolean; className?: stri
 
 export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
   tools = defaultTools,
+  isProjectsIntroActive = false,
+  introKey = 0,
 }) => {
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = React.useState(true);
   const [isMuted, setIsMuted] = React.useState(true);
+
+  const monitorVideoRef = React.useRef<HTMLVideoElement>(null);
+  const monitorStageRef = React.useRef<HTMLDivElement>(null);
+  const [stageScale, setStageScale] = React.useState(1);
+  const [isMonitorPlaying, setIsMonitorPlaying] = React.useState(true);
+  const [isMonitorMuted, setIsMonitorMuted] = React.useState(true);
+
+  React.useEffect(() => {
+    const el = monitorStageRef.current;
+    if (!el) return;
+
+    const updateScale = () => {
+      const rect = el.getBoundingClientRect();
+      if (rect.width > 0) {
+        setStageScale(rect.width / 960);
+      }
+    };
+
+    updateScale();
+
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const width = entry.contentRect.width;
+        if (width > 0) {
+          setStageScale(width / 960);
+        }
+      }
+    });
+    ro.observe(el);
+
+    window.addEventListener('resize', updateScale);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', updateScale);
+    };
+  }, []);
 
   const togglePlay = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -99,32 +142,71 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
     }
   };
 
+  const toggleMonitorPlay = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (monitorVideoRef.current) {
+      if (monitorVideoRef.current.paused) {
+        monitorVideoRef.current.play();
+        setIsMonitorPlaying(true);
+      } else {
+        monitorVideoRef.current.pause();
+        setIsMonitorPlaying(false);
+      }
+    }
+  };
+
+  const toggleMonitorMute = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (monitorVideoRef.current) {
+      monitorVideoRef.current.muted = !monitorVideoRef.current.muted;
+      setIsMonitorMuted(monitorVideoRef.current.muted);
+    }
+  };
+
+  React.useEffect(() => {
+    // Expose helper to window matching user snippet for dynamic video swapping
+    (window as any).setProjectVideo = (url: string) => {
+      const vid = document.getElementById('projectVideo') as HTMLVideoElement;
+      if (vid) {
+        vid.src = url;
+        vid.load();
+        vid.play().catch(() => {});
+      }
+    };
+    (window as any).setProject2Video = (url: string) => {
+      if (monitorVideoRef.current) {
+        monitorVideoRef.current.src = url;
+        monitorVideoRef.current.load();
+        monitorVideoRef.current.play().catch(() => {});
+      }
+    };
+  }, []);
+
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 pt-0 pb-16 flex flex-col">
       {/* 1. TOP ROW: Tool Stack Header on Left, 4×3 Bento Grid on Right */}
       <div
         id="third-section-content"
-        className="w-full flex flex-col lg:flex-row items-start justify-between gap-10 lg:gap-14 xl:gap-20 will-change-transform"
+        className="w-full min-h-[85vh] flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-14 xl:gap-20 will-change-transform py-12 sm:py-16"
       >
-        {/* LEFT: Normal readable description text */}
-        <div className="tools-left-content w-full lg:w-[38%] xl:w-[36%] flex flex-col justify-start text-left shrink-0 will-change-transform pt-2 select-text">
-          <h2
+        {/* LEFT: Normal readable description text with signature entrance animation */}
+        <div className="tools-left-content w-full lg:w-[38%] xl:w-[36%] flex flex-col justify-center text-left shrink-0 will-change-transform pt-2 select-text">
+          <JitterTextReveal
+            as="h2"
+            text="Tool Stack"
             className="text-[38px] sm:text-[48px] md:text-[56px] xl:text-[64px] font-bold text-white tracking-[-0.035em] leading-[1.05] mb-6"
             style={{ fontFamily: 'var(--font-heading)' }}
-          >
-            Tool Stack
-          </h2>
+            stagger={25}
+            duration={800}
+          />
 
-          <p className="text-[16px] sm:text-[18px] md:text-[20px] text-white/70 leading-[1.7] font-normal tracking-[-0.01em]">
-            Every project is built on a carefully selected stack of{' '}
-            <span className="text-white font-medium">enterprise-grade tools</span> — from{' '}
-            <span className="text-white font-medium">Power BI</span> and{' '}
-            <span className="text-white font-medium">SQL Server</span> for analytics, to{' '}
-            <span className="text-white font-medium">Snowflake</span> and{' '}
-            <span className="text-white font-medium">Azure</span> for scalable cloud
-            infrastructure. These are the technologies I rely on daily to deliver{' '}
-            <span className="text-white font-medium">production-ready</span> data solutions.
-          </p>
+          <JitterTextReveal
+            as="p"
+            text="Every project is built on a carefully selected stack of enterprise-grade tools — from Power BI and SQL Server for analytics, to Snowflake and Azure for scalable cloud infrastructure. These are the technologies I rely on daily to deliver production-ready data solutions."
+            className="text-[16px] sm:text-[18px] md:text-[20px] text-white/70 leading-[1.7] font-normal tracking-[-0.01em]"
+            stagger={8}
+            duration={650}
+          />
         </div>
 
         {/* RIGHT: 4×3 Bento Grid (12 boxes) */}
@@ -191,7 +273,58 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
         </div>
       </div>
 
-      {/* 2. SECTION 04: PROJECTS SECTION PLACEMENT
+      {/* ARCHITECTURAL SECTION DIVIDER (Generous Spacing) */}
+      <div className="w-full my-28 sm:my-36 md:my-44 pointer-events-none select-none">
+        <div className="relative w-full h-px bg-white/10 flex items-center justify-between">
+          <span className="text-[11px] font-mono text-white/30 -translate-y-1/2 bg-[#000000] px-1.5">+</span>
+          <span className="text-[9px] font-mono text-white/25 tracking-[0.2em] uppercase hidden md:inline-block bg-[#000000] px-3">
+            ARCHITECTURAL STATEMENT &bull; BUILD FOR SCALE
+          </span>
+          <span className="text-[11px] font-mono text-white/30 -translate-y-1/2 bg-[#000000] px-1.5">+</span>
+        </div>
+      </div>
+
+      {/* 2. SECTION 3.5: FULL-SCREEN JITTER TEXT REVEAL & SCROLL SCALE */}
+      <div
+        id="projects-intro-section"
+        className="projects-intro-section w-full min-h-[85vh] sm:min-h-screen py-28 sm:py-36 my-6 flex items-center justify-center text-center px-6 sm:px-10 md:px-16 lg:px-20 xl:px-28 relative select-none will-change-transform"
+      >
+        {/* Subtle Ambient Radial Glow */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-45"
+          style={{
+            backgroundImage:
+              'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255, 255, 255, 0.08) 0%, rgba(16, 185, 129, 0.03) 40%, transparent 75%)',
+          }}
+        />
+
+        {/* Grand Full-Screen Text matching exact user spec */}
+        <div className="w-full max-w-[1640px] mx-auto py-6 sm:py-10 md:py-14">
+          <JitterTextReveal
+            key={introKey}
+            text="These are the projects architect with precision and build for scale."
+            trigger={isProjectsIntroActive}
+            renderAsDots={true}
+            enableScrollScale={true}
+            stagger={28}
+            className="text-[36px] sm:text-[50px] md:text-[66px] lg:text-[84px] xl:text-[98px] 2xl:text-[112px] font-bold text-white tracking-[-0.038em] leading-[1.08] text-center"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          />
+        </div>
+      </div>
+
+      {/* ARCHITECTURAL SECTION DIVIDER (Generous Spacing) */}
+      <div className="w-full my-28 sm:my-36 md:my-44 pointer-events-none select-none">
+        <div className="relative w-full h-px bg-white/10 flex items-center justify-between">
+          <span className="text-[11px] font-mono text-white/30 -translate-y-1/2 bg-[#000000] px-1.5">+</span>
+          <span className="text-[9px] font-mono text-white/25 tracking-[0.2em] uppercase hidden md:inline-block bg-[#000000] px-3">
+            FLAGSHIP ENTERPRISE SHOWCASE &bull; 04
+          </span>
+          <span className="text-[11px] font-mono text-white/30 -translate-y-1/2 bg-[#000000] px-1.5">+</span>
+        </div>
+      </div>
+
+      {/* 3. SECTION 04: PROJECTS SECTION PLACEMENT
           - Left: Hands tablet scaled down slightly and shifted further left for balanced stage
           - Center: Tablet screen maximized with authentic high-end Loop Task Management System UI
           - Bottom: Hands anchor down to the bottom of the screen with wrists grounded
@@ -199,7 +332,7 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
       */}
       <div
         id="fourth-section"
-        className="w-full mt-[100vh] min-h-[calc(100vh-3.5rem)] lg:min-h-[calc(100vh-4rem)] pt-2 flex flex-col-reverse lg:flex-row items-end justify-between gap-6 lg:gap-8 xl:gap-10 pb-2 sm:pb-3 lg:pb-4"
+        className="fourth-section-block w-full pt-10 sm:pt-16 pb-4 sm:pb-6 flex flex-col-reverse lg:flex-row items-center lg:items-end justify-between gap-6 lg:gap-8 xl:gap-10"
       >
         {/* LEFT: Hands Tablet Artwork - Shifted a bit left side */}
         <div className="fourth-section-hands w-full lg:w-[58%] xl:w-[57%] -ml-10 sm:-ml-16 lg:-ml-22 xl:-ml-28 flex items-end justify-start self-end overflow-visible shrink-0">
@@ -251,11 +384,26 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
               </div>
             </div>
 
-            {/* Halftone Hands Tablet Frame Overlay (Anchored to bottom-left corner) */}
+            {/* Halftone Hands Tablet Frame Overlay (Anchored to bottom-left corner) with feather mask at bottom */}
             <img
               src={handsDeviceSvg}
               alt="Hands Holding Tablet"
               className="absolute inset-0 w-full h-full object-contain object-left-bottom pointer-events-none z-20 select-none filter drop-shadow-[0_25px_50px_rgba(0,0,0,0.95)]"
+              style={{
+                maskImage:
+                  'linear-gradient(to bottom, #000000 0%, #000000 76%, rgba(0,0,0,0.7) 86%, rgba(0,0,0,0.2) 94%, transparent 100%)',
+                WebkitMaskImage:
+                  'linear-gradient(to bottom, #000000 0%, #000000 76%, rgba(0,0,0,0.7) 86%, rgba(0,0,0,0.2) 94%, transparent 100%)',
+              }}
+            />
+
+            {/* Seamless Black Overlay: Softly fades and dissolves the wrist endings into the black background */}
+            <div
+              className="absolute -inset-x-8 -bottom-1 h-[26%] sm:h-[28%] md:h-[30%] pointer-events-none z-30"
+              style={{
+                background:
+                  'linear-gradient(to top, #000000 22%, rgba(0, 0, 0, 0.9) 55%, rgba(0, 0, 0, 0.35) 82%, transparent 100%)',
+              }}
             />
           </div>
         </div>
@@ -278,20 +426,24 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
 
           {/* Description with Generous Spacing & Signature Tools Grid */}
           <div className="fourth-section-desc space-y-8 sm:space-y-10 lg:space-y-12">
-            <p className="text-[17px] sm:text-[18.5px] md:text-[20px] lg:text-[21px] text-white/75 leading-[1.85] sm:leading-[1.9] font-normal tracking-[-0.012em]">
-              Architected an enterprise grade, multi tenant task and workforce management portal with a{' '}
-              <span className="text-white font-medium">4 tier RBAC system</span> across 13 controllers and 12 route groups. Built a{' '}
-              <span className="text-white font-medium">Stale While Revalidate caching engine</span> processing{' '}
-              <span className="text-white font-medium">300,000+ biometric attendance logs</span>, plus automated{' '}
-              <span className="text-white font-medium">Excel JS / PDF Kit</span> reporting pipelines with{' '}
-              <span className="text-white font-medium">tamper proof daily work logs</span>.
-            </p>
+            <JitterTextReveal
+              as="p"
+              text="Architected an enterprise grade, multi tenant task and workforce management portal with a 4 tier RBAC system across 13 controllers and 12 route groups. Built a Stale While Revalidate caching engine processing 300,000+ biometric attendance logs, plus automated Excel JS / PDF Kit reporting pipelines with tamper proof daily work logs."
+              className="text-[17px] sm:text-[18.5px] md:text-[20px] lg:text-[21px] text-white/75 leading-[1.85] sm:leading-[1.9] font-normal tracking-[-0.012em]"
+              stagger={8}
+              duration={650}
+            />
 
             {/* Tools Used: Signature Grid-Type Manner with Ample Spacing */}
             <div className="pt-2 sm:pt-4">
               <div className="text-[11.5px] sm:text-[13px] font-mono text-white/45 uppercase tracking-widest mb-4 sm:mb-5 flex items-center gap-2.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span>Core Stack & Modules</span>
+                <JitterTextReveal
+                  as="span"
+                  text="Core Stack & Modules"
+                  stagger={16}
+                  duration={550}
+                />
               </div>
 
               <div className="relative w-full border border-white/15 bg-[#030304] overflow-hidden">
@@ -331,6 +483,197 @@ export const ToolsGridSection: React.FC<ToolsGridSectionProps> = ({
                 <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
                 <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ARCHITECTURAL SECTION DIVIDER (Generous Spacing between Project 1 and Project 2) */}
+      <div className="w-full my-14 sm:my-18 md:my-22 pointer-events-none select-none">
+        <div className="relative w-full h-px bg-white/10 flex items-center justify-between">
+          <span className="text-[11px] font-mono text-white/30 -translate-y-1/2 bg-[#000000] px-1.5">+</span>
+          <span className="text-[9px] font-mono text-white/25 tracking-[0.2em] uppercase hidden md:inline-block bg-[#000000] px-3">
+            PROJECT 02 // TECHNICAL HUB &bull; 10-YEAR ANALYTICS
+          </span>
+          <span className="text-[11px] font-mono text-white/30 -translate-y-1/2 bg-[#000000] px-1.5">+</span>
+        </div>
+      </div>
+
+      {/* 5. SECTION 05: SECOND PROJECT SECTION PLACEMENT
+          - Left: Same structure as Project 1 (Dotted Title, Description, Core Stack & Modules Grid)
+          - Right: Halftone Monitor with Perspective Screen Video & Interactive Controls (Shifted a bit right)
+      */}
+      <div
+        id="fifth-section"
+        className="fifth-section-block w-screen relative left-1/2 -translate-x-1/2 max-w-[1920px] px-4 sm:px-8 md:px-12 lg:px-14 xl:px-16 2xl:px-20 pt-4 sm:pt-6 pb-16 sm:pb-20 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8 xl:gap-12 overflow-visible"
+      >
+        {/* LEFT: Project Details (Same structure as Project 1: Dotted Title, Description, Core Stack & Modules) */}
+        <div className="w-full lg:w-[45%] xl:w-[44%] 2xl:w-[43%] flex flex-col justify-start text-left pt-2 sm:pt-4 pb-4 shrink-0 select-text self-center lg:self-start">
+          {/* Title - Halftone Dotted Title matching Project 1 structure (1 line or max 2 lines) */}
+          <div
+            className="fifth-section-title mb-8 sm:mb-10 lg:mb-14 xl:mb-16"
+            role="heading"
+            aria-level={3}
+            aria-label="Technical Hub - 10-Year Analytics Dashboard"
+          >
+            <JitterTextReveal
+              as="h3"
+              text={"Technical Hub -\n10-Year Analytics Dashboard"}
+              renderAsDots={true}
+              nowrapLines={true}
+              className="text-[26px] sm:text-[32px] md:text-[38px] lg:text-[40px] xl:text-[46px] 2xl:text-[50px] font-bold text-white tracking-[-0.035em] leading-[1.12]"
+              stagger={16}
+              duration={700}
+            />
+          </div>
+
+          {/* Description with Generous Spacing & Signature Tools Grid matching Project 1 */}
+          <div className="fifth-section-desc space-y-8 sm:space-y-10 lg:space-y-12">
+            <JitterTextReveal
+              as="p"
+              text="Built a comprehensive 10-year analytics dashboard for Technical Hub, transforming years of scattered organizational data into a single, interactive source of truth. Consolidated historical data across programs, certifications, placements, staff growth, power consumption, websites, applications, and key organizational metrics."
+              className="text-[17px] sm:text-[18.5px] md:text-[19.5px] lg:text-[20px] xl:text-[20.5px] text-white/75 leading-[1.85] sm:leading-[1.9] font-normal tracking-[-0.012em] max-w-[720px] xl:max-w-[800px] 2xl:max-w-[880px]"
+              stagger={8}
+              duration={650}
+            />
+
+            {/* Tools Used: Signature Grid-Type Manner with Ample Spacing matching Project 1 */}
+            <div className="pt-2 sm:pt-4">
+              <div className="text-[11.5px] sm:text-[13px] font-mono text-white/45 uppercase tracking-widest mb-4 sm:mb-5 flex items-center gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <JitterTextReveal
+                  as="span"
+                  text="Core Stack & Modules"
+                  stagger={16}
+                  duration={550}
+                />
+              </div>
+
+              <div className="relative w-full border border-white/15 bg-[#030304] overflow-hidden">
+                {/* 3×2 Bento Grid for the 6 Core Project Tools */}
+                <div className="grid grid-cols-2 sm:grid-cols-3">
+                  {[
+                    { name: 'Data Analytics', category: 'Historical ETL', isHatched: false },
+                    { name: 'Data Visualization', category: 'Interactive BI', isHatched: true },
+                    { name: 'HTML', category: 'Semantic DOM', isHatched: false },
+                    { name: 'CSS', category: 'Responsive UI', isHatched: true },
+                    { name: 'JavaScript', category: 'Dynamic Engine', isHatched: false },
+                    { name: 'Vercel', category: 'Cloud Infrastructure', isHatched: true },
+                  ].map((item, idx) => (
+                    <div
+                      key={item.name}
+                      className={`relative min-h-[96px] sm:min-h-[110px] md:min-h-[118px] p-4 sm:p-5 md:p-5.5 flex flex-col justify-between border-r border-b border-white/[0.1] transition-colors group select-none ${
+                        item.isHatched ? 'bg-[#040405]' : 'bg-[#070709] hover:bg-[#0c0c0f]'
+                      }`}
+                      style={item.isHatched ? hatchedStyle : undefined}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] sm:text-[10px] md:text-[10.5px] font-mono text-white/40 uppercase tracking-wider">
+                          0{idx + 1} // {item.category}
+                        </span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-white/20 group-hover:bg-emerald-400 transition-colors" />
+                      </div>
+                      <span className="text-[14.5px] sm:text-[16px] md:text-[17px] font-bold text-white tracking-tight group-hover:text-emerald-300 transition-colors pt-2">
+                        {item.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Corner Intersection Rings */}
+                <span className="absolute -top-1 -left-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
+                <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
+                <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 rounded-full border border-white/40 bg-black pointer-events-none" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT: Halftone Monitor with 3D Perspective-Tilted Video Screen (Shifted a little bit right) */}
+        <div className="fifth-section-monitor w-full lg:w-[55%] xl:w-[56%] 2xl:w-[57%] flex items-center justify-center lg:justify-end shrink-0 select-none overflow-visible lg:translate-x-4 xl:translate-x-8 2xl:translate-x-12">
+          <div
+            ref={monitorStageRef}
+            className="relative w-full max-w-[1020px] lg:max-w-[1240px] xl:max-w-[1440px] 2xl:max-w-[1600px] aspect-[960/532] flex items-center justify-center overflow-hidden"
+          >
+            {/* Scaled Coordinate Space Canvas (960 x 532) strictly synchronized with the SVG coordinate system */}
+            <div
+              className="absolute top-0 left-0 w-[960px] h-[532px] pointer-events-auto origin-top-left"
+              style={{
+                transform: `scale(${stageScale})`,
+                transformOrigin: 'top left',
+              }}
+            >
+              {/* Perspective Screen Container - Masked with sleek thin-bezel quadrilateral */}
+              <div
+                className="absolute inset-0 z-10 overflow-hidden group cursor-pointer"
+                style={{
+                  clipPath: 'polygon(23.70% 22.80%, 77.30% 3.80%, 75.50% 62.80%, 19.40% 82.20%)',
+                  WebkitClipPath: 'polygon(23.70% 22.80%, 77.30% 3.80%, 75.50% 62.80%, 19.40% 82.20%)',
+                }}
+                onClick={() => toggleMonitorPlay()}
+              >
+                {/* 3D Perspective Tilted Video:
+                    Transformed by projective matrix3d mapping standard 1000x625 (16:10) desktop screen
+                    to the exact tilted 3D plane and foreshortened quad with a thin sleek right bezel */}
+                <video
+                  ref={monitorVideoRef}
+                  id="projectVideo"
+                  src="/technicalhub-insights.mp4"
+                  autoPlay
+                  loop
+                  muted={isMonitorMuted}
+                  playsInline
+                  className="absolute top-0 left-0 w-[1000px] h-[625px] object-cover bg-black select-none pointer-events-none"
+                  style={{
+                    transformOrigin: '0 0',
+                    transform: 'matrix3d(0.508655046, -0.101240865, 0, -0.000007957, -0.079403224, 0.474253839, 0, -0.000071710, 0, 0, 1, 0, 227.520000, 121.296000, 0, 1)',
+                  }}
+                >
+                  <source src="/technicalhub-insights.mp4" type="video/mp4" />
+                </video>
+
+                {/* Subtle Realistic 3D Glass Screen Reflection Glare */}
+                <div
+                  className="absolute top-0 left-0 w-[1000px] h-[625px] pointer-events-none"
+                  style={{
+                    transformOrigin: '0 0',
+                    transform: 'matrix3d(0.508655046, -0.101240865, 0, -0.000007957, -0.079403224, 0.474253839, 0, -0.000071710, 0, 0, 1, 0, 227.520000, 121.296000, 0, 1)',
+                    background: 'linear-gradient(125deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 28%, transparent 55%, rgba(0,0,0,0.2) 100%)',
+                  }}
+                />
+
+                {/* Floating Controls Overlay on Hover */}
+                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute bottom-12 right-24 z-30 flex items-center gap-1.5 pointer-events-auto">
+                    <button
+                      type="button"
+                      onClick={toggleMonitorPlay}
+                      className="px-2.5 py-1.5 rounded bg-black/85 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-colors text-[9px] sm:text-[10px] font-mono flex items-center gap-1.5 shadow-xl cursor-pointer"
+                      title={isMonitorPlaying ? 'Pause video' : 'Play video'}
+                    >
+                      <span>{isMonitorPlaying ? '⏸' : '▶'}</span>
+                      <span>{isMonitorPlaying ? 'PAUSE' : 'PLAY'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={toggleMonitorMute}
+                      className="px-2.5 py-1.5 rounded bg-black/85 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-colors text-[9px] sm:text-[10px] font-mono flex items-center gap-1.5 shadow-xl cursor-pointer"
+                      title={isMonitorMuted ? 'Unmute video' : 'Mute video'}
+                    >
+                      <span>{isMonitorMuted ? '🔇' : '🔊'}</span>
+                      <span>{isMonitorMuted ? 'MUTED' : 'SOUND'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Halftone Monitor Dot Art Frame Overlay (Sits directly on top of the 960x532 coordinate space) */}
+              <img
+                src={monitorFrameSvg}
+                alt="Project Monitor Halftone Frame"
+                className="absolute inset-0 w-full h-full object-contain pointer-events-none z-20 select-none filter drop-shadow-[0_25px_50px_rgba(0,0,0,0.95)]"
+              />
             </div>
           </div>
         </div>

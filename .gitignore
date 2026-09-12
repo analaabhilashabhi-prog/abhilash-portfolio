@@ -27,3 +27,5 @@ dist-ssr
 frame_*.jpg
 *.mp4
 !public/final-video.mp4
+!public/technicalhub-insights.mp4
+
